@@ -3,22 +3,30 @@ $(document).ready(function(){
     var get_coord_point = function(place, geocoder,callback)
     {    
         var point = new Array();
+        var def = $.Deferred();
         geocoder.geocode( { 'address': place}, function(results, status) {
+            
             if (status == google.maps.GeocoderStatus.OK)
             {
+              console.log(place)
               var resulty = (results[0].geometry.bounds.b.b + results[0].geometry.bounds.b.f) /2;
               var resultx = (results[0].geometry.bounds.f.b + results[0].geometry.bounds.f.f) /2;
               fromx = resultx;
               fromy = resulty;
               point.push(fromx);
               point.push(fromy);
+              console.log('point');
+              def.resolve();
               callback(point);
+              
             }
           });
+        return def.promise();
     }
     
-    var get_coord = function(data_border)
+    var get_coord = function(data_border,callback)
     {
+        var i = 1; 
         console.log(data_border)
         var json_border = [];
         var geocoder = new google.maps.Geocoder();
@@ -26,15 +34,21 @@ $(document).ready(function(){
             var point = new Array();
             var fromPoint = new Array();
             var toPoint = new Array();
-            get_coord_point(this.from, geocoder,function(point){fromPoint = point})
-                .then(function(point){console.log(point)});
-            get_coord_point(this.to, geocoder,function(point){toPoint = point})
-                .then(function(point){console.log(point)});
-            json_border.push({points : point, curvature: -0.27});
-            console.log(json_border)
+
+
+            get_coord_point(this.from, geocoder,function(point){
+              fromPoint = point; console.log(fromPoint);console.log("end")}).then(get_coord_point(this.to, geocoder,function(point){
+              toPoint = point; console.log(toPoint); console.log("end")})).then(function(){ var s = fromPoint.concat(toPoint);
+              console.log(i);
+              json_border.push({points:s, curvature: -0.27});
+              if(i === data_border.length){
+                callback(json_border)
+              }
+              i++ ;});
+
+
         });
-    
-        return json_border;
+        
     }
     
     var generate_map = function(json_borders)
@@ -182,9 +196,8 @@ $(document).ready(function(){
         return result = [{from:'poland', to:'chicago'},{from:'syria', to:'germany'},{from:'etiopia', to:'italy'}]
     }
     var data = get_data();
-    var borders = get_coord(data)
-    var map = generate_map(borders);
-    console.log(map)
+    var borders = get_coord(data,function(borders){generate_map(borders);})
+
 });
 // Helper function to bind data field to the local var.
 function filter_function(val1, val2) {
