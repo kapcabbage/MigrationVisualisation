@@ -16,9 +16,7 @@ $(document).ready(function(){
               point.push(fromx);
               point.push(fromy);
               console.log('point');
-              def.resolve();
-              callback(point);
-              
+              callback(point,def);
             }
           });
         return def.promise();
@@ -34,17 +32,25 @@ $(document).ready(function(){
             var point = new Array();
             var fromPoint = new Array();
             var toPoint = new Array();
+            
+            var from = get_coord_point(this.from, geocoder,function(point,def){
+              fromPoint = point; console.log(fromPoint);console.log("end"); def.resolve()});
 
+            var to = get_coord_point(this.to, geocoder,function(point,def){
+              toPoint = point; console.log(toPoint); console.log("end"); def.resolve()});
 
-            get_coord_point(this.from, geocoder,function(point){
-              fromPoint = point; console.log(fromPoint);console.log("end")}).then(get_coord_point(this.to, geocoder,function(point){
-              toPoint = point; console.log(toPoint); console.log("end")})).then(function(){ var s = fromPoint.concat(toPoint);
+            var def = $.when(from, to);
+
+            def.done(function(){ var s = fromPoint.concat(toPoint);
               console.log(i);
               json_border.push({points:s, curvature: -0.27});
               if(i === data_border.length){
+                console.log(json_border)
                 callback(json_border)
               }
               i++ ;});
+
+
 
 
         });
@@ -193,7 +199,7 @@ $(document).ready(function(){
     
     var get_data = function()
     {
-        return result = [{from:'poland', to:'chicago'},{from:'syria', to:'germany'},{from:'etiopia', to:'italy'}]
+        return result = [{from:'poland', to:'chicago'},{from:'syria', to:'germany'},{from:'etiopia', to:'italy'},{from:'thailand', to:'brazil'},{from:'kamerun', to:'canada'}]
     }
     var data = get_data();
     var borders = get_coord(data,function(borders){generate_map(borders);})
