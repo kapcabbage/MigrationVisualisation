@@ -180,7 +180,7 @@ $(document).ready(function(){
         var zoomController = anychart.ui.zoom();
         zoomController.render(map);
          // set container id for the chart
-        map.container('container');
+        map.container('maparea');
         // initiate chart drawing
         map.draw();
         var connects = map.connector(json_borders)
