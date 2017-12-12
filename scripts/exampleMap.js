@@ -110,70 +110,70 @@ $(document).ready(function(){
               parseInt(this.getData('area')).toLocaleString() + ' km&#178';
           });
 
-        var scale = anychart.scales.ordinalColor([{
-            less: 10
-          },
-          {
-            from: 10,
-            to: 30
-          },
-          {
-            from: 30,
-            to: 50
-          },
-          {
-            from: 50,
-            to: 100
-          },
-          {
-            from: 100,
-            to: 200
-          },
-          {
-            from: 200,
-            to: 300
-          },
-          {
-            from: 300,
-            to: 500
-          },
-          {
-            from: 500,
-            to: 1000
-          },
-          {
-            greater: 1000
-          }
-        ]);
-        scale.colors(['#81d4fa', '#4fc3f7', '#29b6f6', '#039be5', '#0288d1', '#0277bd', '#01579b', '#014377', '#000000']);
+        // var scale = anychart.scales.ordinalColor([{
+        //     less: 10
+        //   },
+        //   {
+        //     from: 10,
+        //     to: 30
+        //   },
+        //   {
+        //     from: 30,
+        //     to: 50
+        //   },
+        //   {
+        //     from: 50,
+        //     to: 100
+        //   },
+        //   {
+        //     from: 100,
+        //     to: 200
+        //   },
+        //   {
+        //     from: 200,
+        //     to: 300
+        //   },
+        //   {
+        //     from: 300,
+        //     to: 500
+        //   },
+        //   {
+        //     from: 500,
+        //     to: 1000
+        //   },
+        //   {
+        //     greater: 1000
+        //   }
+        // ]);
+        //scale.colors(['#81d4fa', '#4fc3f7', '#29b6f6', '#039be5', '#0288d1', '#0277bd', '#01579b', '#014377', '#000000']);
 
-        var colorRange = map.colorRange();
-        colorRange.enabled(true)
-          .padding([0, 0, 20, 0]);
-        colorRange.ticks()
-          .enabled(true)
-          .stroke('3 #ffffff')
-          .position('center')
-          .length(7);
-        colorRange.colorLineSize(5);
-        colorRange.marker().size(7);
-        colorRange.labels()
-          .fontSize(11)
-          .padding(3, 0, 0, 0)
-          .format(function() {
-            var range = this.colorRange;
-            var name;
-            if (isFinite(range.start + range.end)) {
-              name = range.start + ' - ' + range.end;
-            } else if (isFinite(range.start)) {
-              name = 'More than ' + range.start;
-            } else {
-              name = 'Less than ' + range.end;
-            }
-            return name
-          });
+        // var colorRange = map.colorRange();
+        // colorRange.enabled(true)
+        //   .padding([0, 0, 20, 0]);
+        // colorRange.ticks()
+        //   .enabled(true)
+        //   .stroke('3 #ffffff')
+        //   .position('center')
+        //   .length(7);
+        // colorRange.colorLineSize(5);
+        // colorRange.marker().size(7);
+        // colorRange.labels()
+        //   .fontSize(11)
+        //   .padding(3, 0, 0, 0)
+        //   .format(function() {
+        //     var range = this.colorRange;
+        //     var name;
+        //     if (isFinite(range.start + range.end)) {
+        //       name = range.start + ' - ' + range.end;
+        //     } else if (isFinite(range.start)) {
+        //       name = 'More than ' + range.start;
+        //     } else {
+        //       name = 'Less than ' + range.end;
+        //     }
+        //     return name
+        //   });
 
-        series.colorScale(scale);
+        // series.colorScale(scale);
         
        
         // create zoom controls
@@ -202,7 +202,10 @@ $(document).ready(function(){
         return result = [{from:'poland', to:'chicago'},{from:'syria', to:'germany'},{from:'etiopia', to:'italy'},{from:'thailand', to:'brazil'},{from:'kamerun', to:'canada'}]
     }
     var data = get_data();
-    var borders = get_coord(data,function(borders){generate_map(borders);})
+    generate_map()
+    ko.applyBindings(ViewModel);
+    getCountries();
+    //var borders = get_coord(data,function(borders){generate_map(borders);})
 
 });
 // Helper function to bind data field to the local var.
