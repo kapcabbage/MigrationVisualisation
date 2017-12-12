@@ -1,0 +1,93 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="styles.css">
+    <script type="text/javascript" src="js/jquery-3.2.1.js"></script>
+    <script type="text/javascript" src="js/knockout-3.4.2.js"></script>
+    <script type="text/javascript" src="js/knockout.mapping-latest.debug.js"></script>
+    <script type="text/javascript" src="js/scripts.js"></script>
+    <title>UNHCR Data Reader</title>
+</head>
+<body>
+    <header>
+		<h1>UNHCR Test</h1>
+    </header>
+    <div class="flex-container">
+        <nav>
+            <table>
+                <tr>
+                    <td><a href="#countries">Kraje</a></td>
+                </tr>
+                <tr>
+                    <td><a href="#movement">Uchodźcy z do</a></td>
+                </tr>
+                <tr>
+                    <td><a href="#PKB">PKB</a></td>
+                </tr>
+			</table>
+		</nav>
+        <div class="articles">
+			<article id="countries">
+				<h2>Kraje</h2>
+				<table>
+					<thead>
+						<tr>
+							<th>
+								<p>Nazwa</p>
+							</th>
+							<th>
+								<p>Skrót</p>
+							</th>
+						</tr>
+					</thead>
+					
+                    <tbody data-bind="foreach: countries">
+						<tr>
+							<td><input type="text" data-bind="value: country_of_residence_en" readonly></td>
+							<td><input type="text" data-bind="value: country_of_residence" readonly></td>
+						</tr>
+					</tbody>
+				</table>
+			</article>
+			<article id="movement">
+				<h2>Uchodźcy z X do Y w miesiącu Z</h2>
+				Kraj z: <select required data-bind="options: $root.countries,
+				optionsText: 'country_of_residence_en',
+				optionsValue: 'country_of_residence',
+				optionsCaption: 'wybierz',
+				value: chosenFrom
+				"></select><br>
+				Kraj do: <select required data-bind="options: $root.countries,
+				optionsText: 'country_of_residence_en',
+				optionsValue: 'country_of_residence',
+				optionsCaption: 'wybierz',
+				value: chosenTo
+				"></select><br>
+				Rok: <input data-bind="value: chosenYear" type="number" step="1" value="2015" placeholder="rok" min="1960" max="2016" required /></td><br>
+				Miesiąc: <input data-bind="value: chosenMonth" type="number" step="1" value="1" placeholder="miesiąc" min="1" max="12" required /></td><br>
+				<input type="button" value="Zapytaj" data-bind="click: $root.getRefugees"/> 
+				<br>
+				<br>
+				Liczba osób:<input type="number" data-bind="value: peopleAm" readonly>
+			</article>
+			<article id="PKB">
+				<h2>PKB</h2>
+				Kraj: <select required data-bind="options: $root.countries,
+				optionsText: 'country_of_residence_en',
+				optionsValue: 'country_of_residence',
+				optionsCaption: 'wybierz',
+				value: chosenCountry
+				"></select><br>
+				Rok: <input data-bind="value: chosenYear" type="number" step="1" value="2015" placeholder="rok" min="1960" max="2016" required /></td><br>
+				<input type="button" value="Zapytaj" data-bind="click: $root.getPKB"/> 
+				<br>
+				<br>
+				PKB per capita (US $):<input type="number" data-bind="value: PKB" readonly>
+			</article>
+		</div>
+	</div>
+</body>
+</html>

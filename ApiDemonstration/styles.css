@@ -1,0 +1,125 @@
+
+article:target {
+	display: block;
+}
+
+article:not(:target) {
+	display: none;
+}
+
+.flex-container{
+    display: flex;
+    flex-wrap: wrap;
+}
+
+nav{
+    flex: 1 2 200px;
+    min-width: 200px;
+}
+
+nav table{
+	width: 100%;
+}
+
+div.articles{
+    flex: 4 2 200px;
+    min-width: 200px;
+}
+
+body header{
+    background: #37a2b2;
+    color: #FCFFF5;
+}
+
+body footer{
+    background: linear-gradient(#37a2b2,#66217e);
+    color: #FCFFF5;
+}
+
+a {
+    text-decoration: none;
+}
+
+a:hover{
+    text-decoration: underline;
+}
+
+h1,h2{
+    font-family: verdana;
+    text-transform: uppercase;
+    letter-spacing: 5px;
+}
+
+h1{
+    font-size: 2em;
+}
+
+h2{
+    font-size: 1.5em;
+}
+
+table tr:nth-child(odd){
+    background: #abbeff;
+}
+
+table tr:nth-child(even){
+    background: #c2abff;
+}
+
+input, select{
+    background-color: transparent;
+}
+
+tbody tr:hover td{
+    border-color: white;
+}
+
+table, th, td {
+    border: 1px solid black;
+}
+
+input:invalid {
+    background-color: #ffdddd;
+}
+
+@media print{
+    header, footer, nav, .dontprint, td:last-child, th:last-child, button{
+        display: none;
+    }
+    h1,h2{
+        font-family: verdana;
+    }
+    .articles table thead tr, .articles table thead tr{
+        background: none;
+        color: black;
+    }
+    .articles table, .articles table th, .articles table td{
+        border: none;
+        background-color: transparent;
+    }
+
+    tbody tr:nth-child(odd), tbody tr:nth-child(odd) input{
+        background: none;
+    }
+
+    tbody tr:nth-child(even), tbody tr:nth-child(odd) input{
+        background: none;
+    }
+
+    table input{
+        border: none;
+        background-color: transparent;
+    }
+	
+    select{
+        border: none;
+		-moz-appearance: none;
+		-webkit-appearance: none;
+    }
+
+    table input:invalid{
+        border: none;
+        color: black;
+        background-color: inherit;
+    }
+}
