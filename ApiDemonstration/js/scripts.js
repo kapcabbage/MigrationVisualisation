@@ -3,7 +3,6 @@
 var ViewModel = {
     countries: ko.observableArray([]),
 	chosenFrom: ko.observable("SYR"),
-	chosenTo: ko.observable("SRB"),
 	chosenYear: ko.observable("2015"),
 	chosenMonth: ko.observable("1"),
 	peopleAm: ko.observable("0"),
@@ -73,12 +72,6 @@ function getRefugees() {
 	var query = "?";
 	if(ViewModel.chosenFrom() != ""){
 		query += "coo="+ViewModel.chosenFrom();
-	}
-	if(ViewModel.chosenTo() != ""){
-		if(query != "?"){
-			query += "&";
-		}
-		query += "coa="+ViewModel.chosenTo();
 	}
 	if(ViewModel.chosenYear() != ""){
 		if(query != "?"){
