@@ -1,0 +1,39 @@
+#slidecontainer {
+    width: 98%; /* Width of the outside container */
+
+}
+
+.tooltip237 {
+    position: absolute;
+    z-index: 1020;
+    display: block;
+    padding: 5px;
+    visibility: visible;
+    margin-top: -2px;
+    bottom:120%;
+    margin-left: -1.5em;
+}
+
+.tooltip237 .tooltip237-arrow {
+    bottom: 0;
+    left: 50%;
+    margin-left: -5px;
+    border-top: 5px solid #000000;
+    border-right: 5px solid transparent;
+    border-left: 5px solid transparent;
+    position: absolute;
+    width: 0;
+    height: 0;
+}
+
+.tooltip237-inner {
+    max-width: 200px;
+    padding: 3px 8px;
+    color: #fff;
+    text-align: center;
+    text-decoration: none;
+    background-color: #438EB9;
+    -webkit-border-radius: 4px;
+       -moz-border-radius: 4px;
+            border-radius: 4px;
+}

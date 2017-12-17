@@ -20,6 +20,35 @@ var ViewModel = {
     }
 };
 
+ko.bindingHandlers.slider = {
+  init: function (element, valueAccessor, allBindingsAccessor) {
+    var options = allBindingsAccessor().sliderOptions || {};
+      if (ko.isObservable(options.max)) {
+          options.max.subscribe(function(newValue) {
+              $(element).slider('option', 'max', newValue);
+          });
+          options.max = ko.utils.unwrapObservable(options.max);
+      }
+    $(element).slider(options);
+    ko.utils.registerEventHandler(element, "slidechange", function (event, ui) {
+        var observable = valueAccessor();
+        observable(ui.value);
+    });
+    ko.utils.domNodeDisposal.addDisposeCallback(element, function () {
+        $(element).slider("destroy");
+    });
+    ko.utils.registerEventHandler(element, "slide", function (event, ui) {
+        var observable = valueAccessor();
+        observable(ui.value);
+    });
+  },
+  update: function (element, valueAccessor) {
+    var value = ko.utils.unwrapObservable(valueAccessor());
+    if (isNaN(value)) value = 0;
+    $(element).slider("value", value);
+
+  }
+};
 
 
 function getCountries() {
@@ -119,21 +148,25 @@ function getRefugees(callback) {
     return def.promise();
 }
 
-var get_coord_point = function(place, geocoder, callback) {
-    var point = new Array();
+var get_coord_point = function(place, callback) {
+    
     var def = $.Deferred();
-    geocoder.geocode({ 'address': place }, function(results, status) {
+    var point = new Array();
+    $.getJSON("https://restcountries.eu/rest/v2/name/" + place.replace('.',''), function(result) {
 
-        if (status == google.maps.GeocoderStatus.OK) {
-        	
-            var resulty = (results[0].geometry.bounds.b.b + results[0].geometry.bounds.b.f) / 2;
-            var resultx = (results[0].geometry.bounds.f.b + results[0].geometry.bounds.f.f) / 2;
+       
+        	console.log(place)
+        	console.log(result);
+            var resulty = result[0].latlng[1];
+            var resultx = result[0].latlng[0];
             var fromx = resultx;
             var fromy = resulty;
             point.push(fromx);
             point.push(fromy);
-            callback(point, def);
-        }
+            
+        
+    }).done(function() {
+        callback(point, def);
     });
     return def.promise();
 }
@@ -143,19 +176,19 @@ var get_coord = function(data_border, callback) {
     console.log("databorder")
     console.log(data_border)
     var json_border = [];
-    var geocoder = new google.maps.Geocoder();
     $.each(data_border, function() {
+    	var row = this;
         var point = new Array();
         var fromPoint = new Array();
         var toPoint = new Array();
         console.log(this.from)
         console.log(this.to)
-        var from = get_coord_point(this.from, geocoder, function(point, def) {
+        var from = get_coord_point(this.from, function(point, def) {
             fromPoint = point;
             def.resolve()
         });
 
-        var to = get_coord_point(this.to, geocoder, function(point, def) {
+        var to = get_coord_point(this.to, function(point, def) {
             toPoint = point;
             def.resolve()
         });
@@ -164,7 +197,7 @@ var get_coord = function(data_border, callback) {
         def.done(function() {
             var s = fromPoint.concat(toPoint);
 
-            json_border.push({ points: s, curvature: -0.27 });
+            json_border.push({ points: s, curvature: -0.27 ,from: row.from, to: row.to, value: row.value,year:row.year});
             console.log(json_border)
             if (i === data_border.length) {
             	console.log(json_border);
