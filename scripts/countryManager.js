@@ -83,7 +83,7 @@ function getPKB() {
         url: url,
         //dataType: "json",
         success: function(data) {
-            console.log(data);
+          
             if (data.length > 0) {
                 ViewModel.PKB(data[0].value);
             } else {
@@ -108,8 +108,6 @@ function getRefugees(chosenFrom,callback) {
         query += "year=" + ViewModel.chosenYear();
     }
     var outputData = [];
-    console.log(query)
-    console.log(ViewModel.chosenFrom());
     $.getJSON("http://popdata.unhcr.org/api/stats/asylum_seekers_monthly.json" + query,
         function(data) {
             console.log(data);
@@ -125,7 +123,7 @@ function getRefugees(chosenFrom,callback) {
                 }
                 // Sort by price high to low
                 outputData.sort(sort_by('value', true, parseInt));
-                console.log(outputData);
+            
                 ViewModel.peopleAm(data[0].value);
                 outputData = outputData.slice(0,4);
             } else {
@@ -160,16 +158,13 @@ var get_coord_point = function(place, callback) {
 
 var get_coord = function(data_border, callback) {
     var i = 1;
-    console.log("databorder")
-    console.log(data_border)
     var json_border = [];
     $.each(data_border, function() {
     	var row = this;
         var point = new Array();
         var fromPoint = new Array();
         var toPoint = new Array();
-        console.log(this.from)
-        console.log(this.to)
+
         var from = get_coord_point(this.from, function(point, def) {
             fromPoint = point;
             def.resolve()
@@ -185,13 +180,10 @@ var get_coord = function(data_border, callback) {
             var s = fromPoint.concat(toPoint);
 
             json_border.push({ points: s, curvature: -0.27 ,from: row.from, to: row.to, value: row.value,year:row.year});
-            console.log(json_border)
             if (i === data_border.length) {
-            	console.log(json_border);
                 callback(json_border)
             }
-            console.log(i)
-            console.log(data_border.length)
+    
             i++;
 
         });

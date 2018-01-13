@@ -2,17 +2,22 @@ var map;
 var searchedCountries = new Array();
 
 $(document).ready(function() {
-    $("#myRange").on("change", function(e) {
-        if (typeof ViewModel.chosenFrom() !== 'undefined') {
-            get_connects();
-        } else console.log("no country provided")
+
+    $('#search-close-button').on("click", function(event, ui) {
+       $('#search').hide();
     });
+
+    $('#search-modal-button').on("click", function(event, ui) {
+       $('#search').show();
+    });
+
 
     $("#slidercomeagain").on("slide", function(event, ui) {
         console.log(typeof ViewModel.chosenFrom() !== 'undefined')
         if (typeof ViewModel.chosenFrom() !== 'undefined') {
-            map.removeAllSeries();
-            searchedCountries.forEach(function(entry){
+            ViewModel.chosenYear(ui.value);
+            searchedCountries.forEach(function(entry) {
+                map.removeSeries(entry.name);
                 get_connects(entry.code);
             });
         } else console.log("no country provided")
@@ -23,19 +28,26 @@ $(document).ready(function() {
     });
 
     $('#sidebar').on('click', '.country-entry-button', function() {
+        console.log(searchedCountries);
         var name = $(this).siblings('.country-entry-name');
         var container = $(this).closest('.country-entry');
-        console.log(container);
-        var entry = searchedCountries.indexOf(name[0].textContent);
-        if (entry > -1) {
-            searchedCountries.splice(entry, 1);
+        console.log(name[0].textContent);
+        var entry = $.grep(searchedCountries, function(a) {
+            return a.name == name[0].textContent;
+        });
+        console.log(entry[0])
+
+        if (entry.length > 0) {
+            console.log(searchedCountries.indexOf(entry[0]));
+            var index = searchedCountries.indexOf(entry[0]);
+            searchedCountries.splice(index, 1);
             map.removeSeries(name[0].textContent);
             $(container[0]).remove();
         };
+        console.log(searchedCountries);
 
     });
     mapObj = generate_map(function(mapa) {
-        console.log(mapa);
         map = mapa
     });
     ko.applyBindings(ViewModel);
@@ -47,18 +59,29 @@ $(document).ready(function() {
 
 var get_connects = function(chosenFrom) {
     var outputData = new Array();
-    var data = ViewModel.getRefugees(chosenFrom,function(destinations, def) {
-        console.log(destinations)
+    var data = ViewModel.getRefugees(chosenFrom, function(destinations, def) {
         outputData = destinations;
-        console.log(outputData)
         def.resolve();
     });
     var def = $.when(data);
     def.done(function() {
         var borders = get_coord(outputData, function(borders) {
-            searchedCountries.push({name: borders[0].from , code:ViewModel.chosenFrom()});
+            console.log(outputData)
+            var entry = $.grep(searchedCountries, function(a) {
+                return a.code == chosenFrom;
+            });
+
+            if (entry.length == 0) {
+                searchedCountries.push({ name: borders[0].from, code: ViewModel.chosenFrom() });
+                console.log(searchedCountries);
+                var sidebar = $('#sidebar').append('<li>' +
+                    '<span class="country-entry">' +
+                    '<p class="country-entry-name">' + borders[0].from + '</p><i class="fa fa-times country-entry-button" aria-hidden="true"></i>' +
+                    '</span>' +
+                    '</li>');
+            }
             var dataSet = anychart.data.set(borders);
-            createSeries('3 - 5%', dataSet, '#996633', borders[0].from)
+            createSeries('3 - 5%', dataSet, getRandomColor(), borders[0].from)
         })
     });
 }
@@ -68,23 +91,16 @@ var deleteSeries = function() {
 }
 
 var createSeries = function(name, data, color, seriesFrom) {
-    map.removeSeries("Angola")
     // Creates connector series for destinations and customizes them
     var connectorSeries = map.connector(data)
         .name(name)
         .fill(color)
         .stroke('1.5 ' + color)
         .curvature(0);
-    var sidebar = $('#sidebar').append('<li>' +
-        '<span class="country-entry">' +
-        '<p class="country-entry-name">' + seriesFrom + '</p><i class="fa fa-times country-entry-button" aria-hidden="true"></i>' +
-        '</span>' +
-        '</li>');
 
     connectorSeries.id(seriesFrom);
 
     var seriesCount = map.getSeriesCount();
-    console.log(seriesCount);
     //map.removeSeriesAt(0);
     connectorSeries.hovered()
         .stroke('1.5 #212121')
@@ -149,18 +165,6 @@ var createSeries = function(name, data, color, seriesFrom) {
                 '<span style="color: #d9d9d9">In year</span>: ' +
                 this.getData('year');
         });
-    // map.legend()
-    //         .enabled(true)
-    //         .position('center-bottom')
-    //         .padding([20, 0, 0, 0])
-    //         .fontSize(10);
-
-    // map.legend().title()
-    //         .enabled(true)
-    //         .fontSize(13)
-    //         .padding([0, 0, 5, 0])
-    //         .text('Migrants ')
-    // ;
 };
 
 var generate_map = function(callback) {
@@ -221,7 +225,6 @@ var generate_map = function(callback) {
         map.draw();
     });
 
-    console.log(map);
     callback(map)
     return map;
 

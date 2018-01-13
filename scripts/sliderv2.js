@@ -6,7 +6,6 @@
 
       var tooltip = '<div class="tooltip237"><div class="tooltip237-inner">' 
              + curValue + '</div><div class="tooltip237-arrow"></div></div>';
-      ViewModel.chosenYear(curValue);
       // update the tooltip of the target slider
       $("#"+target + ' .ui-slider-handle').html(tooltip);
 
