@@ -96,3 +96,26 @@ html {
     margin-top: 10px;
     border-radius: 0px;
 }
+
+.country-entry{
+    display: flex;
+    flex-wrap: nowrap;
+    line-height: 1;
+    margin-bottom: 0;
+    cursor: pointer;
+}
+
+.country-entry-name{
+    padding: 10px;
+}
+
+.country-entry-button{
+    padding-top: 10px;
+    padding-right: 10px;
+    padding-bottom: 10px;
+    padding-left: 2px;
+}
+
+.country-entry:hover{
+    background: #e7e7e7;
+}

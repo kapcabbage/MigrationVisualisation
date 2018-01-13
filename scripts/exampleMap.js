@@ -1,83 +1,167 @@
 var map;
+var searchedCountries = new Array();
 
 $(document).ready(function() {
     $("#myRange").on("change", function(e) {
-        console.log(ViewModel.chosenFrom())
-        console.log(typeof ViewModel.chosenFrom() !== 'undefined')
         if (typeof ViewModel.chosenFrom() !== 'undefined') {
             get_connects();
         } else console.log("no country provided")
     });
 
+    $("#slidercomeagain").on("slide", function(event, ui) {
+        console.log(typeof ViewModel.chosenFrom() !== 'undefined')
+        if (typeof ViewModel.chosenFrom() !== 'undefined') {
+            map.removeAllSeries();
+            searchedCountries.forEach(function(entry){
+                get_connects(entry.code);
+            });
+        } else console.log("no country provided")
+    });
     $('#get-migration').submit(function(e) {
         e.preventDefault();
-        get_connects();
+        get_connects(ViewModel.chosenFrom());
     });
 
+    $('#sidebar').on('click', '.country-entry-button', function() {
+        var name = $(this).siblings('.country-entry-name');
+        var container = $(this).closest('.country-entry');
+        console.log(container);
+        var entry = searchedCountries.indexOf(name[0].textContent);
+        if (entry > -1) {
+            searchedCountries.splice(entry, 1);
+            map.removeSeries(name[0].textContent);
+            $(container[0]).remove();
+        };
 
+    });
     mapObj = generate_map(function(mapa) {
         console.log(mapa);
         map = mapa
     });
-
-
     ko.applyBindings(ViewModel);
     getCountries();
 
-
 });
-// Helper function to bind data field to the local var.
-function filter_function(val1, val2) {
-    if (val2)
-        return function(fieldVal) {
-            return val1 <= fieldVal && fieldVal < val2;
-        };
-    else
-        return function(fieldVal) {
-            return val1 <= fieldVal;
-        };
+
+
+
+var get_connects = function(chosenFrom) {
+    var outputData = new Array();
+    var data = ViewModel.getRefugees(chosenFrom,function(destinations, def) {
+        console.log(destinations)
+        outputData = destinations;
+        console.log(outputData)
+        def.resolve();
+    });
+    var def = $.when(data);
+    def.done(function() {
+        var borders = get_coord(outputData, function(borders) {
+            searchedCountries.push({name: borders[0].from , code:ViewModel.chosenFrom()});
+            var dataSet = anychart.data.set(borders);
+            createSeries('3 - 5%', dataSet, '#996633', borders[0].from)
+        })
+    });
 }
 
-var get_connects = function(){
-  var outputData = new Array();
-        var data = ViewModel.getRefugees(function(destinations, def) {
-            console.log(destinations)
-            outputData = destinations;
-            console.log(outputData)
-            def.resolve();
-        });
-        var def = $.when(data);
-        def.done(function() {
-            var borders = get_coord(outputData, function(borders) {
-                var series = map.choropleth();
-                var connects = map.connector(borders);
-                console.log(borders);
-                connects.startSize(0);
-                connects.endSize(5)
-                connects.type("arrowhead");;
-                //connects.colorScale(anychart.scales.linearColor('#FFEBD6','#C40A0A'));
-                // connects.fill("#FF9966");
-                // connects.stroke("#CCCC99");
-                // connects.hovered().fill("#996633");
-                // connects.selected().fill("#996633");
-                // connects.hovered().stroke("#CCCC99");
-                // connects.hovered().stroke("#CCCC99");;
-                connects.tooltip().useHtml(true)
-                    .format(function() {
-                        console.log(this)
-                        return '<span style="color: #d9d9d9">From</span>: ' +
-                            this.getData('from') + '<br/>' +
-                            '<span style="color: #d9d9d9">To</span>: ' +
-                            this.getData('to') + '<br/>' +
-                            '<span style="color: #d9d9d9">Number of migrats</span>: ' +
-                            this.value +'<br/>' +
-                            '<span style="color: #d9d9d9">In year</span>: ' +
-                            this.getData('year');
-                    });
-                
-            })
-        });
+var deleteSeries = function() {
+
 }
+
+var createSeries = function(name, data, color, seriesFrom) {
+    map.removeSeries("Angola")
+    // Creates connector series for destinations and customizes them
+    var connectorSeries = map.connector(data)
+        .name(name)
+        .fill(color)
+        .stroke('1.5 ' + color)
+        .curvature(0);
+    var sidebar = $('#sidebar').append('<li>' +
+        '<span class="country-entry">' +
+        '<p class="country-entry-name">' + seriesFrom + '</p><i class="fa fa-times country-entry-button" aria-hidden="true"></i>' +
+        '</span>' +
+        '</li>');
+
+    connectorSeries.id(seriesFrom);
+
+    var seriesCount = map.getSeriesCount();
+    console.log(seriesCount);
+    //map.removeSeriesAt(0);
+    connectorSeries.hovered()
+        .stroke('1.5 #212121')
+        .fill('#212121');
+
+    connectorSeries.markers()
+        .position('100%')
+        .size(20)
+        .fill(color)
+        .stroke('2 #E1E1E1');
+
+    connectorSeries.hovered().markers()
+        .position('100%')
+        .size(20)
+        .fill('#212121')
+        .stroke('2 #455a64');
+
+    if (name == 'More then 10%') {
+        connectorSeries.startSize(7).endSize(2);
+    } else if (name == '5 - 10%') {
+        connectorSeries.startSize(5).endSize(1.5);
+    } else if (name == '3 - 5%') {
+        connectorSeries.startSize(3).endSize(1);
+    } else {
+        connectorSeries.startSize(0).endSize(0);
+    }
+
+    // Sets settings for labels for the destination series
+    connectorSeries.labels()
+        .enabled(true)
+        .offsetY(0)
+        .offsetX(0)
+        .fontSize(10)
+        .position('100%')
+        .format(function() {
+            return this.getData('to')
+        });
+
+    connectorSeries.hovered().labels()
+        .enabled(true)
+        .fontColor('#212121');
+
+    // Sets settings for legend items
+    connectorSeries.legendItem()
+        .iconType('square')
+        .iconFill(color)
+        .iconStroke(false);
+
+    // Sets tooltip setting for the destination series
+    connectorSeries.tooltip()
+        .useHtml(true)
+        .padding([8, 13, 10, 13])
+        .titleFormat('{%to}')
+        .fontSize(13)
+        .format(function() {
+            return '<span style="color: #d9d9d9">From</span>: ' +
+                this.getData('from') + '<br/>' +
+                '<span style="color: #d9d9d9">To</span>: ' +
+                this.getData('to') + '<br/>' +
+                '<span style="color: #d9d9d9">Number of migrats</span>: ' +
+                this.value + '<br/>' +
+                '<span style="color: #d9d9d9">In year</span>: ' +
+                this.getData('year');
+        });
+    // map.legend()
+    //         .enabled(true)
+    //         .position('center-bottom')
+    //         .padding([20, 0, 0, 0])
+    //         .fontSize(10);
+
+    // map.legend().title()
+    //         .enabled(true)
+    //         .fontSize(13)
+    //         .padding([0, 0, 5, 0])
+    //         .text('Migrants ')
+    // ;
+};
 
 var generate_map = function(callback) {
     var map;
@@ -107,7 +191,7 @@ var generate_map = function(callback) {
 
 
         var series = map.choropleth(density_data);
-
+        series.id("Map")
         series.labels(false);
 
         series.hovered()

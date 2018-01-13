@@ -11,9 +11,9 @@ var ViewModel = {
     PKB: ko.observable("0"),
 
 
-    getRefugees: function(callback) {
+    getRefugees: function(chosenFrom,callback) {
         //var def =  getRefugees(callback);
-        return getRefugees(callback);
+        return getRefugees(chosenFrom,callback);
     },
     getPKB: function() {
         getPKB();
@@ -93,12 +93,12 @@ function getPKB() {
     });
 }
 
-function getRefugees(callback) {
+function getRefugees(chosenFrom,callback) {
     console.log("getRefugees");
     var def = $.Deferred();
     var query = "?";
-    if (ViewModel.chosenFrom() != "") {
-        query += "coo=" + ViewModel.chosenFrom();
+    if (chosenFrom != "") {
+        query += "coo=" + chosenFrom;
     }
 
     if (ViewModel.chosenYear() != "") {
@@ -107,24 +107,14 @@ function getRefugees(callback) {
         }
         query += "year=" + ViewModel.chosenYear();
     }
-    // if(ViewModel.chosenMonth() != ""){
-    // 	if(query != "?"){
-    // 		query += "&";
-    // 	}
-    // 	query += "month="+ViewModel.chosenMonth();
-    // }
     var outputData = [];
-    console.log("http://popdata.unhcr.org/api/stats/asylum_seekers_monthly.json" + query);
-
+    console.log(query)
+    console.log(ViewModel.chosenFrom());
     $.getJSON("http://popdata.unhcr.org/api/stats/asylum_seekers_monthly.json" + query,
         function(data) {
-            //console.log(data);
+            console.log(data);
             if (data.length > 0) {
-
-
                 var grouped = groupBy(data, row => row.country_of_asylum);
-                console.log(grouped.entries());
-
                 for (var key of grouped.keys()) {
                     var value = grouped.get(key);
                     var entry = { from: value[0].country_of_origin_en.split('(')[0], to: value[0].country_of_asylum_en.split('(')[0], year: value[0].year, value: 0 };
@@ -135,7 +125,7 @@ function getRefugees(callback) {
                 }
                 // Sort by price high to low
                 outputData.sort(sort_by('value', true, parseInt));
-                //console.log(outputData);
+                console.log(outputData);
                 ViewModel.peopleAm(data[0].value);
                 outputData = outputData.slice(0,4);
             } else {
@@ -154,9 +144,6 @@ var get_coord_point = function(place, callback) {
     var point = new Array();
     $.getJSON("https://restcountries.eu/rest/v2/name/" + place.replace('.',''), function(result) {
 
-       
-        	console.log(place)
-        	console.log(result);
             var resulty = result[0].latlng[1];
             var resultx = result[0].latlng[0];
             var fromx = resultx;
@@ -208,8 +195,6 @@ var get_coord = function(data_border, callback) {
             i++;
 
         });
-
-
 
     });
 

@@ -23,3 +23,19 @@ var sort_by = function(field, reverse, primer){
        return a = key(a), b = key(b), reverse * ((a > b) - (b > a));
      } 
 }
+
+// Helper function to bind data field to the local var.
+function filter_function(val1, val2) {
+    if (val2)
+        return function(fieldVal) {
+            return val1 <= fieldVal && fieldVal < val2;
+        };
+    else
+        return function(fieldVal) {
+            return val1 <= fieldVal;
+        };
+}
+
+function exist(element, given) {
+  return (element == given);
+}

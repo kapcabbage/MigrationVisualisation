@@ -20,3 +20,6 @@
       create: sliderTooltip,
       slide: sliderTooltip
   });
+
+  
+
