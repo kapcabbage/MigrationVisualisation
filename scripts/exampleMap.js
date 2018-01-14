@@ -377,10 +377,11 @@ var generate_map = function(callback) {
                 '<span style="color: #d9d9d9">Population</span>: ' + this.value
             });
             
-		chart2 = anychart.bar();
+		chart2 = anychart.column();
 		chart2.container("chart2");
 		var chartData2 = anychart.data.set();
-		chart2.bar(chartData2);
+		var chart2Series = chart2.column(chartData2);
+        chart2Series.name("Refugees welcomed");
 		chart2.draw();
 		chart3 = anychart.bar();
 		chart3.container("chart3");
@@ -408,13 +409,38 @@ var generate_map = function(callback) {
                     {
                         intermission += "(" + results.length + ")";
                     }
-                    title.text("Refugees residing in " + ViewModel.chosenYear() + ", top 10" + intermission +" nationalities");
+                    title.text("Refugees residing in " + series.name + " in " + ViewModel.chosenYear() + ", top 10" + intermission +" nationalities");
                     title.enabled(true);
 					for(i = 0; i < results.length; i++)
 					{
 						chartData1.append(results[i]);
 					}
 				});
+                
+				for(i = 0; i < chartData2.getRowsCount(); 	)
+				{
+					chartData2.remove(0);
+				}
+                var year = parseInt(ViewModel.chosenYear());
+                var title = chart2.title();
+                title.text("Refugees welcomed in " + series.name + " between " + (year - 9) + " and " + year);
+                title.enabled(true);
+                for(i = 9; i >= 0; i--){
+                    var currYear = year - i;
+                    getRefugeesYearly(shortcut, currYear, function(results, def)
+                    {
+                        var dataView = chartData2.mapAs();
+                        for(i = 0; i < chartData2.getRowsCount(); i++)
+                        {
+                            if(dataView.get(i, 'x') > results.x)
+                            {
+                                chartData2.insert(results, i);
+                                return;
+                            }
+                        }
+                        chartData2.append(results);
+                    });
+                }
 			}
 		});
 		

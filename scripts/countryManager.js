@@ -6,6 +6,7 @@ namesDict["Russia"] = "Russian Federation"
 namesDict["United States"] = "United States of America"
 namesDict["Greenland"] = "Denmark"
 namesDict["Democratic Republic of the Congo"] = "Dem. Rep. of the Congo"
+namesDict["Central African Republic"] = "Central African Rep."
 
 var ViewModel = {
     countries: ko.observableArray([]),
@@ -256,6 +257,38 @@ function getResidents(chosenCountry, callback)
                 }
 			}
             //console.log(outputData);
+        }
+    ).done(function() {
+        callback(outputData, def);
+    });
+    return def.promise();
+}
+
+function getRefugeesYearly(destination, year, callback)
+{
+    var query = "?";
+    var def = $.Deferred();
+    if (destination != "") {
+        query += "country_of_asylum=" + destination;
+    }
+    if (year != "") {
+        if (query != "?") {
+            query += "&";
+        }
+        query += "year=" + year;
+    }
+    if (query != "?") {
+        query += "&";
+    }
+    query += "total=true";
+    var outputData = {x: year, value: 0};
+    var address = "http://popdata.unhcr.org/api/stats/asylum_seekers_monthly.json" + query
+	$.getJSON(address,
+        function(data) {
+            if(data.total != NaN && data.total != undefined)
+            {
+                outputData.value += data.total;
+            }
         }
     ).done(function() {
         callback(outputData, def);
