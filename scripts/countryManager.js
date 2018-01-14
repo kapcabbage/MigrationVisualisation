@@ -217,11 +217,17 @@ function getRefugees(chosenFrom, callback) {
 }
 
 function compareAmounts(a,b) {
-  if (a.refugees > b.refugees)
-    return -1;
-  if (a.refugees < b.refugees)
-    return 1;
-  return 0;
+    if ((a.refugees == 0 || a.refugees == NaN) && (b.refugees == 0 || b.refugees == NaN))
+        return 0;
+    if (b.refugees == 0 || b.refugees == NaN)
+        return -1;
+    if (a.refugees == 0 || a.refugees == NaN)
+        return 1;
+    if (a.refugees > b.refugees)
+        return -1;
+    if (a.refugees < b.refugees)
+        return 1;
+    return 0;
 }
 
 function getResidents(chosenCountry, callback)
@@ -244,7 +250,10 @@ function getResidents(chosenCountry, callback)
 			var limit = Math.min(data.length, 10);
 			for(i = 0; i < limit; i++)
 			{
-				outputData.push({x: data[i].country_of_origin, value: data[i].refugees})
+                if(data[i].refugees != 0 && data[i].refugees != NaN)
+                {
+                    outputData.push({x: data[i].country_of_origin, value: data[i].refugees});
+                }
 			}
             //console.log(outputData);
         }
