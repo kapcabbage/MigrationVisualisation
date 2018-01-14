@@ -160,7 +160,7 @@ var createPkbMap = function(argument) {
                     '<span style="color: #d9d9d9">Area</span>: ' +
                     parseInt(this.getData('area')).toLocaleString() + ' km&#178 <br/>' +
                     '<span style="color: #d9d9d9">pkbPerCapita</span>: ' +
-                    parseInt(this.getData('pkbPerCapita')).toLocaleString() + '<br/>';
+                    parseInt(this.getData('pkbPerCapita')).toLocaleString();
             });
 
 
@@ -379,10 +379,10 @@ var generate_map = function(callback) {
 		
 		map.listen("click", function(e){
 			// display hidden tooltip
-			tooltip.style.display = 'block';
 
 			var index = e.pointIndex;
-			if (e.pointIndex != null) {
+			if (index != null && typeof index !== 'undefined') {
+				tooltip.style.display = 'block';
 				var series = data[index];
 				for(i = 0; i < chartData1.getRowsCount(); 	)
 				{
