@@ -44,7 +44,6 @@ $(document).ready(function() {
                 return e.indexOf(entry[0].name) !== -1;
             })
             filtered.forEach(function(e) {
-                console.log(e);
                 map.removeSeries(e);
             })
             addedSeries = addedSeries.filter(function(el) {
@@ -52,7 +51,6 @@ $(document).ready(function() {
             });
         };
         get_connects(ViewModel.chosenFrom());
-        console.log(map.getSeriesCount());
     });
 
     $('#sidebar').on('click', '.country-entry-button', function() {
@@ -78,12 +76,9 @@ $(document).ready(function() {
             });
             $(container[0]).remove();
         };
-        console.log(addedSeries);
-        console.log(searchedCountries);
 
     });
     mapObj = generate_map(function(mapa, data) {
-        console.log(countries)
         map = mapa;
         //countries = data;
 
@@ -140,7 +135,6 @@ var createPkbMap = function(argument) {
         });
         def.resolve();
     });
-    console.log(argument);
     var def = $.when(pkbdata);
     def.done(function() {
 
@@ -255,11 +249,7 @@ var createPkbMap = function(argument) {
             .padding([0, 0, 5, 0])
             .text('Visibility');
         // create zoom controls
-        var zoomController = anychart.ui.zoom();
-        zoomController.render(map);
-        // set container id for the chart
-
-
+        
     });
 }
 
@@ -374,135 +364,9 @@ var generate_map = function(callback) {
         countries = data;
         console.log("DATA")
         //console.log(dataCountries);
-        var pkbdata = ViewModel.getAllPKB(function(pkb, def) {
-            data.forEach(function(entry) {
-                var pkbrow = $.grep(pkb, function(a) {
-                    return a.country.id == entry.id
-                });
-                if (typeof pkbrow[0] != 'undefined') {
-                    entry['pkbPerCapita'] = pkbrow[0].value;
-                }
-            });
-            console.log(data)
-            def.resolve();
-        });
-        var def = $.when(pkbdata);
-        def.done(function() {
-
-            var dataSet = anychart.data.set(data);
-            var density_data = dataSet.mapAs({
-                'value': 'pkbPerCapita'
-            });
-            var series = map.choropleth(density_data);
-            series.name("World")
-            series.id("Map")
-            series.labels(false);
-
-            series.hovered()
-                .fill('#f48fb1')
-                .stroke(anychart.color.darken('#f48fb1'));
-
-            series.selected()
-                .fill('#c2185b')
-                .stroke(anychart.color.darken('#c2185b'));
-
-            series.tooltip()
-                .useHtml(true)
-                .format(function() {
-                    return '<span style="color: #d9d9d9">Density</span>: ' +
-                        parseFloat(this.getData('density')).toLocaleString() + ' pop./km&#178 <br/>' +
-                        '<span style="color: #d9d9d9">Population</span>: ' +
-                        parseInt(this.getData('population')).toLocaleString() + '<br/>' +
-                        '<span style="color: #d9d9d9">Area</span>: ' +
-                        parseInt(this.getData('area')).toLocaleString() + ' km&#178 <br/>' +
-                        '<span style="color: #d9d9d9">pkbPerCapita</span>: ' +
-                        parseInt(this.getData('pkbPerCapita')).toLocaleString() + '<br/>';
-                });
-            var scale = anychart.scales.ordinalColor([{
-                    less: 1000
-                },
-                {
-                    from: 1000,
-                    to: 2000
-                },
-                {
-                    from: 2000,
-                    to: 4000
-                },
-                {
-                    from: 4000,
-                    to: 8000
-                },
-                {
-                    from: 8000,
-                    to: 15000
-                },
-                {
-                    from: 15000,
-                    to: 25000
-                },
-                {
-                    from: 25000,
-                    to: 60000
-                },
-                {
-                    greater: 60000
-                }
-            ]);
-
-            scale.colors(['#42a5f5', '#64b5f6', '#90caf9', '#ffa726', '#fb8c00', '#f57c00', '#ef6c00', '#e65100']);
-            series.colorScale(scale);
-
-            var colorRange = map.colorRange();
-            colorRange.enabled(true)
-                .padding([20, 0, 0, 0])
-                .colorLineSize(5)
-                .marker({
-                    size: 7
-                });
-            colorRange.ticks()
-                .enabled(true)
-
-                .position('center')
-                .length(20);
-            colorRange.labels()
-                .fontSize(10)
-                .padding(0, 0, 0, 5)
-                .format(function() {
-                    var range = this.colorRange;
-                    var name;
-                    if (isFinite(range.start + range.end)) {
-                        name = range.start + ' - ' + range.end;
-                    } else if (isFinite(range.start)) {
-                        name = 'Less then ' + range.start;
-                    } else {
-                        name = 'More then ' + range.end;
-                    }
-                    return name
-                })
-            colorRange.title()
-                .enabled(true)
-                .useHtml(true)
-                .fontSize(9)
-                .padding([10, 0, 10, 0])
-                .text('GDP per capita');
-            map.legend()
-                .enabled(true)
-                .position('center-bottom')
-                .padding([20, 0, 0, 0])
-                .fontSize(10);
-
-            map.legend().title()
-                .enabled(true)
-                .fontSize(13)
-                .padding([0, 0, 5, 0])
-                .text('Visibility');
-            // create zoom controls
-            var zoomController = anychart.ui.zoom();
-            zoomController.render(map);
-            // set container id for the chart
-
-        });
+        createPkbMap(countries);
+        var zoomController = anychart.ui.zoom();
+        zoomController.render(map);
     });
     map.container('maparea');
     // initiate chart drawing
