@@ -362,10 +362,10 @@ var generate_map = function(callback) {
 		tooltip.onclick = function() {
 			tooltip.style.display = "none";
 		}
-		chart1 = anychart.bar();
+		chart1 = anychart.column();
 		chart1.container("chart1");
 		var chartData1 = anychart.data.set();
-		chart1.bar(chartData1);
+		chart1.column(chartData1);
 		chart1.draw();
 		chart2 = anychart.bar();
 		chart2.container("chart2");
@@ -385,14 +385,20 @@ var generate_map = function(callback) {
 			if (index != null && typeof index !== 'undefined') {
 				tooltip.style.display = 'block';
 				var series = data[index];
+				var shortcut = get3LetterCode(series.name)
+				
+				
 				for(i = 0; i < chartData1.getRowsCount(); 	)
 				{
 					chartData1.remove(0);
 				}
-				for(i = 0; i < 10; i++)
+				getResidents(shortcut, function(results, def) 
 				{
-					chartData1.append({x: series.name + i.toString(), value: i});
-				}
+					for(i = 0; i < results.length; i++)
+					{
+						chartData1.append(results[i]);
+					}
+				});
 			}
 		});
 		

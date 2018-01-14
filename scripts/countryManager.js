@@ -1,5 +1,12 @@
 "use strict";
 
+//map api to UNHCR
+var namesDict = []
+namesDict["Russia"] = "Russian Federation"
+namesDict["United States"] = "United States of America"
+namesDict["Greenland"] = "Denmark"
+namesDict["Democratic Republic of the Congo"] = "Dem. Rep. of the Congo"
+
 var ViewModel = {
     countries: ko.observableArray([]),
     chosenFrom: ko.observable(''),
@@ -16,6 +23,10 @@ var ViewModel = {
     getRefugees: function(chosenFrom,callback) {
         //var def =  getRefugees(callback);
         return getRefugees(chosenFrom,callback);
+    },
+    getResidents: function(chosenCountry,callback) {
+        //var def =  getRefugees(callback);
+        return getResidents(chosenCountry,callback);
     },
     getPKB: function(chosenCountry,callback) {
         getPKB(chosenCountry, callback);
@@ -67,6 +78,28 @@ function getCountries() {
             }
         }
     );
+}
+
+function get3LetterCode(country){
+	if (namesDict[country])
+	{
+		country = namesDict[country]
+	}
+	var foundShort
+    ko.utils.arrayForEach(ViewModel.countries(), function(countryObj) {
+		var countryName = countryObj.country_of_residence_en().toString();
+		if(countryName == country){
+			foundShort = countryObj.country_of_residence();
+		}
+    });
+	if(foundShort != null && foundShort != undefined){
+		return foundShort;
+	}
+    ko.utils.arrayForEach(ViewModel.countries(), function(countryObj) {
+		var countryName = countryObj.country_of_residence_en().toString();
+		console.log(countryName);
+    });
+	console.log("Country not found " + country + ". List of avaliable countries above.");
 }
 
 function getAllPKB(callback) {
@@ -129,7 +162,7 @@ function getPKB(chosenCountry, callback) {
     return def.promise();
 }
 
-function getRefugees(chosenFrom,callback) {
+function getRefugees(chosenFrom, callback) {
     console.log("getRefugees");
     var def = $.Deferred();
     var query = "?";
@@ -165,6 +198,44 @@ function getRefugees(chosenFrom,callback) {
             } else {
                 ViewModel.peopleAm("0");
             }
+        }
+    ).done(function() {
+        callback(outputData, def);
+    });
+    return def.promise();
+}
+
+function compareAmounts(a,b) {
+  if (a.refugees > b.refugees)
+    return -1;
+  if (a.refugees < b.refugees)
+    return 1;
+  return 0;
+}
+
+function getResidents(chosenCountry, callback)
+{
+    var query = "?";
+    var def = $.Deferred();
+    if (chosenCountry != "") {
+        query += "country_of_residence=" + chosenCountry;
+    }
+    if (ViewModel.chosenYear() != "") {
+        if (query != "?") {
+            query += "&";
+        }
+        query += "year=" + ViewModel.chosenYear();
+    }
+    var outputData = [];
+	$.getJSON("http://popdata.unhcr.org/api/stats/persons_of_concern.json" + query,
+        function(data) {
+			data.sort(compareAmounts);
+			var limit = Math.min(data.length, 10);
+			for(i = 0; i < limit; i++)
+			{
+				outputData.push({x: data[i].country_of_origin, value: data[i].refugees})
+			}
+            //console.log(outputData);
         }
     ).done(function() {
         callback(outputData, def);
@@ -219,11 +290,7 @@ var get_coord = function(data_border, callback) {
             if (i === data_border.length) {
                 callback(json_border)
             }
-    
             i++;
-
         });
-
     });
-
 }
