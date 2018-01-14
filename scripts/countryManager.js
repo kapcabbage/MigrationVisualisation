@@ -29,13 +29,9 @@ var ViewModel = {
         //var def =  getRefugees(callback);
         return getResidents(chosenCountry, callback);
     },
-    getPKBGrowth: function(callback) {
-        return getPKBgrowth(callback);
+    getPKB: function(callback) {
+        return getAllPKB(callback);
     },
-
-    getPKBPerCapita: function(callback) {
-        return getPKBPerCapita(callback);
-    }
 };
 
 ko.bindingHandlers.slider = {
@@ -102,9 +98,6 @@ function get3LetterCode(country) {
     console.log("Country not found " + country + ". List of avaliable countries above.");
 }
 
-<<<<<<< HEAD
-function getPKBPerCapita(callback) {
-=======
 function getNameFromCode(code){
 	var foundName
     ko.utils.arrayForEach(ViewModel.countries(), function(countryObj) {
@@ -117,7 +110,6 @@ function getNameFromCode(code){
 }
 
 function getAllPKB(callback) {
->>>>>>> fee281cdda24df96b2afcbb8faa3d8bb213a315d
     var query = "?";
     var indicator;
     var def = $.Deferred();
@@ -149,34 +141,6 @@ function getAllPKB(callback) {
     }).done(function(data) {
         callback(data[1], def);
     });
-    return def.promise();
-}
-
-function getPKBGrowth(callback) {
-    var query = "?";
-    var def = $.Deferred();
-    if (ViewModel.chosenYear() != "") {
-        if (query != "?") {
-            query += "&";
-        }
-        query += "date=" + ViewModel.chosenYear();
-    }
-
-    var url = "http://api.worldbank.org/v2/countries/all/indicators/NY.GDP.MKTP.KD.ZG/" + query + "&per_page=300&format=json";
-    console.log(url);
-    $.ajax({
-        method: 'GET',
-        url: url,
-        success: function(data) {
-            ViewModel.PKBGrowth.removeAll();
-            for (var i = 0; i < data[1].length; i++) {
-                ViewModel.PKBGrowth.push(ko.mapping.fromJS(data[1][i]));
-            };
-        }
-    }).done(function(data) {
-        callback(data[1], def);
-    });
-
     return def.promise();
 }
 
@@ -223,9 +187,6 @@ function getRefugees(chosenFrom, callback) {
     return def.promise();
 }
 
-<<<<<<< HEAD
-function compareAmounts(a, b) {
-=======
 function compareAmounts(a,b) {
     if ((a.refugees == 0 || a.refugees == NaN) && (b.refugees == 0 || b.refugees == NaN))
         return 0;
@@ -233,7 +194,6 @@ function compareAmounts(a,b) {
         return -1;
     if (a.refugees == 0 || a.refugees == NaN)
         return 1;
->>>>>>> fee281cdda24df96b2afcbb8faa3d8bb213a315d
     if (a.refugees > b.refugees)
         return -1;
     if (a.refugees < b.refugees)
@@ -256,13 +216,11 @@ function getResidents(chosenCountry, callback) {
     var outputData = [];
     $.getJSON("http://popdata.unhcr.org/api/stats/persons_of_concern.json" + query,
         function(data) {
-<<<<<<< HEAD
             data.sort(compareAmounts);
             var limit = Math.min(data.length, 10);
             for (i = 0; i < limit; i++) {
                 outputData.push({ x: data[i].country_of_origin, value: data[i].refugees })
             }
-=======
 			data.sort(compareAmounts);
 			var limit = Math.min(data.length, 10);
 			for(i = 0; i < limit; i++)
@@ -272,8 +230,6 @@ function getResidents(chosenCountry, callback) {
                     outputData.push({x: data[i].country_of_origin, value: data[i].refugees});
                 }
 			}
->>>>>>> fee281cdda24df96b2afcbb8faa3d8bb213a315d
-            //console.log(outputData);
         }
     ).done(function() {
         callback(outputData, def);

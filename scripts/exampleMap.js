@@ -129,7 +129,7 @@ var get_connects = function(chosenFrom) {
 }
 
 var createPkbMap = function(argument) {
-    var pkbdata = ViewModel.getPKBPerCapita(function(pkb, def) {
+    var pkbdata = ViewModel.getPKB(function(pkb, def) {
         argument.forEach(function(entry) {
             var pkbrow = $.grep(pkb, function(a) {
                 return a.country.id == entry.id
@@ -171,9 +171,6 @@ var createPkbMap = function(argument) {
                     parseInt(this.getData('area')).toLocaleString() + ' km&#178 <br/>' +
                     (ViewModel.Indicator()? '<span style="color: #d9d9d9">GBP per capita</span>: ' + parseInt(this.getData('pkbPerCapita')).toLocaleString() : '<span style="color: #d9d9d9">GBP growth(annual %)</span>: '+ parseFloat(this.getData('pkbPerCapita')).toLocaleString()+'%')
                     
-            });
-
-        if (ViewModel.Indicator()) {
             });
 
         if (ViewModel.Indicator()) {
