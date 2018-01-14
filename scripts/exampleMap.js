@@ -169,7 +169,7 @@ var createPkbMap = function(argument) {
                     parseInt(this.getData('population')).toLocaleString() + '<br/>' +
                     '<span style="color: #d9d9d9">Area</span>: ' +
                     parseInt(this.getData('area')).toLocaleString() + ' km&#178 <br/>' +
-                    (ViewModel.Indicator()? '<span style="color: #d9d9d9">GBP per capita</span>: ' + parseInt(this.getData('pkbPerCapita')).toLocaleString() : '<span style="color: #d9d9d9">GBP growth(annual %)</span>: '+ parseFloat(this.getData('pkbPerCapita')).toLocaleString()+'%')
+                    (ViewModel.Indicator()? '<span style="color: #d9d9d9">$ GBP per capita</span>: ' + parseInt(this.getData('pkbPerCapita')).toLocaleString() : '<span style="color: #d9d9d9">$ GBP growth(annual %)</span>: '+ parseFloat(this.getData('pkbPerCapita')).toLocaleString()+'%')
                     
             });
 
@@ -247,7 +247,7 @@ var createPkbMap = function(argument) {
             ]);
         }
 
-        scale.colors(['#42a5f5', '#64b5f6', '#90caf9', '#ffa726', '#fb8c00', '#f57c00', '#ef6c00', '#e65100']);
+        scale.colors(ViewModel.Indicator()?['#EE1111', '#EE4411', '#EE8C11', '#EED311', '#EEEE11', '#AFEE11', '#73EE11', '#12FF11']:['#630b0e','#bf0f0f','#EE1111', '#EE4411', '#EE8C11', '#EED311', '#EEEE11', '#AFEE11', '#73EE11', '#12FF11']);
         series.colorScale(scale);
 
         var colorRange = map.colorRange();
@@ -313,7 +313,7 @@ var createPkbMap = function(argument) {
             .useHtml(true)
             .fontSize(9)
             .padding([10, 0, 10, 0])
-            .text('GDP per capita');
+            .text(ViewModel.Indicator()?'$ GDP per capita':'$ GDP annual growth %');
         map.legend()
             .enabled(true)
             .position('center-bottom')
