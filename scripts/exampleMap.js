@@ -32,6 +32,7 @@ $(document).ready(function() {
         map.removeSeries("Map")
         createPkbMap(countries);
     });
+    
     $('#get-migration').submit(function(e) {
         e.preventDefault();
         var entry = $.grep(searchedCountries, function(a) {
@@ -76,6 +77,7 @@ $(document).ready(function() {
             $(container[0]).remove();
         };
     });
+    
     mapObj = generate_map(function(mapa, data) {
         map = mapa;
         //countries = data;
@@ -160,7 +162,7 @@ var createPkbMap = function(argument) {
                     parseInt(this.getData('population')).toLocaleString() + '<br/>' +
                     '<span style="color: #d9d9d9">Area</span>: ' +
                     parseInt(this.getData('area')).toLocaleString() + ' km&#178 <br/>' +
-                    '<span style="color: #d9d9d9">pkbPerCapita</span>: ' +
+                    '<span style="color: #d9d9d9">$ PKB per capita</span>: ' +
                     parseInt(this.getData('pkbPerCapita')).toLocaleString();
             });
 
@@ -197,7 +199,7 @@ var createPkbMap = function(argument) {
             }
         ]);
 
-        scale.colors(['#42a5f5', '#64b5f6', '#90caf9', '#ffa726', '#fb8c00', '#f57c00', '#ef6c00', '#e65100']);
+        scale.colors(['#EE1111', '#EE4411', '#EE8C11', '#EED311', '#EEEE11', '#AFEE11', '#73EE11', '#12FF11']);
         series.colorScale(scale);
 
         var colorRange = map.colorRange();
@@ -221,9 +223,9 @@ var createPkbMap = function(argument) {
                 if (isFinite(range.start + range.end)) {
                     name = range.start + ' - ' + range.end;
                 } else if (isFinite(range.start)) {
-                    name = 'Less then ' + range.start;
+                    name = 'More then ' + range.start;
                 } else {
-                    name = 'More then ' + range.end;
+                    name = 'Less then ' + range.end;
                 }
                 return name
             })
@@ -232,7 +234,7 @@ var createPkbMap = function(argument) {
             .useHtml(true)
             .fontSize(9)
             .padding([10, 0, 10, 0])
-            .text('GDP per capita');
+            .text('$ GDP per capita');
         map.legend()
             .enabled(true)
             .position('center-bottom')
@@ -351,8 +353,8 @@ var generate_map = function(callback) {
             .enabled(true)
             .useHtml(true)
             .padding([10, 0, 10, 0])
-            .text('Population Density (people per km&#178)<br/>' +
-                '<span  style="color:#929292; font-size: 12px;">(Data source: Wikipedia, 2015)</span>');
+            .text('Visualisation of Refugee Migration<br/>' +
+                '<span  style="color:#929292; font-size: 12px;">(Data source: UNHCR, Worldbank, Wikipedia)</span>');
 
         map.geoData('anychart.maps.world');
         map.interactivity().selectionMode('none');
