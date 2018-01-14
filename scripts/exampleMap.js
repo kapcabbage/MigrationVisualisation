@@ -39,6 +39,7 @@ $(document).ready(function() {
         map.removeSeries("Map")
         createPkbMap(countries);
     });
+    
     $('#get-migration').submit(function(e) {
         e.preventDefault();
         var entry = $.grep(searchedCountries, function(a) {
@@ -83,6 +84,7 @@ $(document).ready(function() {
             $(container[0]).remove();
         };
     });
+    
     mapObj = generate_map(function(mapa, data) {
         map = mapa;
         //countries = data;
@@ -157,7 +159,7 @@ var createPkbMap = function(argument) {
         series.selected()
             .fill('#c2185b')
             .stroke(anychart.color.darken('#c2185b'));
-        
+
         series.tooltip()
             .useHtml(true)
             .format(function() {
@@ -169,6 +171,9 @@ var createPkbMap = function(argument) {
                     parseInt(this.getData('area')).toLocaleString() + ' km&#178 <br/>' +
                     (ViewModel.Indicator()? '<span style="color: #d9d9d9">GBP per capita</span>: ' + parseInt(this.getData('pkbPerCapita')).toLocaleString() : '<span style="color: #d9d9d9">GBP growth(annual %)</span>: '+ parseFloat(this.getData('pkbPerCapita')).toLocaleString()+'%')
                     
+            });
+
+        if (ViewModel.Indicator()) {
             });
 
         if (ViewModel.Indicator()) {
@@ -246,6 +251,37 @@ var createPkbMap = function(argument) {
         }
 
         scale.colors(['#42a5f5', '#64b5f6', '#90caf9', '#ffa726', '#fb8c00', '#f57c00', '#ef6c00', '#e65100']);
+        series.colorScale(scale);
+
+        var colorRange = map.colorRange();
+        colorRange.enabled(true)
+            .padding([20, 0, 0, 0])
+            .colorLineSize(5)
+            .marker({
+                size: 7
+            });
+        colorRange.ticks()
+            .enabled(true)
+
+            .position('center')
+            .length(20);
+        colorRange.labels()
+            .fontSize(10)
+            .padding(0, 0, 0, 5)
+            .format(function() {
+                var range = this.colorRange;
+                var name;
+                if (isFinite(range.start + range.end)) {
+                    name = range.start + ' - ' + range.end;
+                } else if (isFinite(range.start)) {
+                    name = 'More then ' + range.start;
+                } else {
+                    name = 'Less then ' + range.end;
+                }
+                return name
+            })
+        colorRange.title()
+            .enabled(true)
         series.colorScale(scale);
 
         var colorRange = map.colorRange();
@@ -399,54 +435,71 @@ var generate_map = function(callback) {
             .enabled(true)
             .useHtml(true)
             .padding([10, 0, 10, 0])
-            .text('Population Density (people per km&#178)<br/>' +
-                '<span  style="color:#929292; font-size: 12px;">(Data source: Wikipedia, 2015)</span>');
+            .text('Visualisation of Refugee Migration<br/>' +
+                '<span  style="color:#929292; font-size: 12px;">(Data source: UNHCR, Worldbank, Wikipedia)</span>');
 
         map.geoData('anychart.maps.world');
         map.interactivity().selectionMode('none');
         map.padding(0);
+			
+		var popup = document.getElementById("myPopup");
+		popup.onclick = function() {
+			popup.style.display = "none";
+		}
+		chart1 = anychart.column();
+		chart1.container("chart1");
+		var chartData1 = anychart.data.set();
+		chart1.column(chartData1);
+		chart1.draw();
+        chart1.tooltip()
+            .useHtml(true)
+            .format(function() {
+                var asdf = this;
+                return '<span style="color: #d9d9d9">From</span>: ' + getNameFromCode(this.x) + '<br/>' +
+                '<span style="color: #d9d9d9">Population</span>: ' + this.value
+            });
+            
+		chart2 = anychart.bar();
+		chart2.container("chart2");
+		var chartData2 = anychart.data.set();
+		chart2.bar(chartData2);
+		chart2.draw();
+		chart3 = anychart.bar();
+		chart3.container("chart3");
+		var chartData3 = anychart.data.set();
+		chart3.bar(chartData3);
+		chart3.draw();
+		
+		map.listen("click", function(e){
 
-        var tooltip = document.getElementById("myPopup");
-        tooltip.onclick = function() {
-            tooltip.style.display = "none";
-        }
-        chart1 = anychart.column();
-        chart1.container("chart1");
-        var chartData1 = anychart.data.set();
-        chart1.column(chartData1);
-        chart1.draw();
-        chart2 = anychart.bar();
-        chart2.container("chart2");
-        var chartData2 = anychart.data.set();
-        chart2.bar(chartData2);
-        chart2.draw();
-        chart3 = anychart.bar();
-        chart3.container("chart3");
-        var chartData3 = anychart.data.set();
-        chart3.bar(chartData3);
-        chart3.draw();
-
-        map.listen("click", function(e) {
-            // display hidden tooltip
-
-            var index = e.pointIndex;
-            if (index != null && typeof index !== 'undefined') {
-                tooltip.style.display = 'block';
-                var series = data[index];
-                var shortcut = get3LetterCode(series.name)
-
-
-                for (i = 0; i < chartData1.getRowsCount();) {
-                    chartData1.remove(0);
-                }
-                getResidents(shortcut, function(results, def) {
-                    for (i = 0; i < results.length; i++) {
-                        chartData1.append(results[i]);
+			var index = e.pointIndex;
+			if (index != null && typeof index !== 'undefined') {
+				popup.style.display = 'block';
+				var series = data[index];
+				var shortcut = get3LetterCode(series.name)
+				
+				for(i = 0; i < chartData1.getRowsCount(); 	)
+				{
+					chartData1.remove(0);
+				}
+				getResidents(shortcut, function(results, def) 
+				{
+                    var title = chart1.title();
+                    var intermission = "";
+                    if(results.length < 10)
+                    {
+                        intermission += "(" + results.length + ")";
                     }
-                });
-            }
-        });
-
+                    title.text("Refugees residing in " + ViewModel.chosenYear() + ", top 10" + intermission +" nationalities");
+                    title.enabled(true);
+					for(i = 0; i < results.length; i++)
+					{
+						chartData1.append(results[i]);
+					}
+				});
+			}
+		});
+		
         countries = data;
         console.log("DATA")
         //console.log(dataCountries);

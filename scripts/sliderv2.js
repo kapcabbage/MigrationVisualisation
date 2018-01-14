@@ -13,8 +13,8 @@
 
   $("#slidercomeagain").slider({
       value: 2015,
-      min: 1960,
-      max: 2016,
+      min: 1990,
+      max: 2015,
       step: 1,
       create: sliderTooltip,
       slide: sliderTooltip

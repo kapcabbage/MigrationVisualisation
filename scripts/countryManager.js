@@ -102,7 +102,22 @@ function get3LetterCode(country) {
     console.log("Country not found " + country + ". List of avaliable countries above.");
 }
 
+<<<<<<< HEAD
 function getPKBPerCapita(callback) {
+=======
+function getNameFromCode(code){
+	var foundName
+    ko.utils.arrayForEach(ViewModel.countries(), function(countryObj) {
+		var countryShort = countryObj.country_of_residence().toString();
+		if(countryShort == code){
+			foundName = countryObj.country_of_residence_en();
+		}
+    });
+	return foundName;
+}
+
+function getAllPKB(callback) {
+>>>>>>> fee281cdda24df96b2afcbb8faa3d8bb213a315d
     var query = "?";
     var indicator;
     var def = $.Deferred();
@@ -208,7 +223,17 @@ function getRefugees(chosenFrom, callback) {
     return def.promise();
 }
 
+<<<<<<< HEAD
 function compareAmounts(a, b) {
+=======
+function compareAmounts(a,b) {
+    if ((a.refugees == 0 || a.refugees == NaN) && (b.refugees == 0 || b.refugees == NaN))
+        return 0;
+    if (b.refugees == 0 || b.refugees == NaN)
+        return -1;
+    if (a.refugees == 0 || a.refugees == NaN)
+        return 1;
+>>>>>>> fee281cdda24df96b2afcbb8faa3d8bb213a315d
     if (a.refugees > b.refugees)
         return -1;
     if (a.refugees < b.refugees)
@@ -231,11 +256,23 @@ function getResidents(chosenCountry, callback) {
     var outputData = [];
     $.getJSON("http://popdata.unhcr.org/api/stats/persons_of_concern.json" + query,
         function(data) {
+<<<<<<< HEAD
             data.sort(compareAmounts);
             var limit = Math.min(data.length, 10);
             for (i = 0; i < limit; i++) {
                 outputData.push({ x: data[i].country_of_origin, value: data[i].refugees })
             }
+=======
+			data.sort(compareAmounts);
+			var limit = Math.min(data.length, 10);
+			for(i = 0; i < limit; i++)
+			{
+                if(data[i].refugees != 0 && data[i].refugees != NaN)
+                {
+                    outputData.push({x: data[i].country_of_origin, value: data[i].refugees});
+                }
+			}
+>>>>>>> fee281cdda24df96b2afcbb8faa3d8bb213a315d
             //console.log(outputData);
         }
     ).done(function() {
