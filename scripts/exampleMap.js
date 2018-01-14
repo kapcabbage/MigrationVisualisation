@@ -169,7 +169,7 @@ var createPkbMap = function(argument) {
                     parseInt(this.getData('population')).toLocaleString() + '<br/>' +
                     '<span style="color: #d9d9d9">Area</span>: ' +
                     parseInt(this.getData('area')).toLocaleString() + ' km&#178 <br/>' +
-                    (ViewModel.Indicator()? '<span style="color: #d9d9d9">$ GBP per capita</span>: ' + parseInt(this.getData('pkbPerCapita')).toLocaleString() : '<span style="color: #d9d9d9">$ GBP growth(annual %)</span>: '+ parseFloat(this.getData('pkbPerCapita')).toLocaleString()+'%')
+                    (ViewModel.Indicator()? '<span style="color: #d9d9d9">$ GDP per capita</span>: ' + parseInt(this.getData('pkbPerCapita')).toLocaleString() : '<span style="color: #d9d9d9">$ GBP growth(annual %)</span>: '+ parseFloat(this.getData('pkbPerCapita')).toLocaleString()+'%')
                     
             });
 
@@ -462,10 +462,11 @@ var generate_map = function(callback) {
 		var chart2Series = chart2.column(chartData2);
         chart2Series.name("Refugees welcomed");
 		chart2.draw();
-		chart3 = anychart.bar();
+		chart3 = anychart.column();
 		chart3.container("chart3");
 		var chartData3 = anychart.data.set();
-		chart3.bar(chartData3);
+		var chart3Series = chart3.column(chartData3);
+        chart3Series.name("Refugees escaped");
 		chart3.draw();
 		
 		map.listen("click", function(e){
@@ -518,6 +519,31 @@ var generate_map = function(callback) {
                             }
                         }
                         chartData2.append(results);
+                    });
+                }
+                
+				for(i = 0; i < chartData3.getRowsCount(); 	)
+				{
+					chartData3.remove(0);
+				}
+                var year = parseInt(ViewModel.chosenYear());
+                var title = chart3.title();
+                title.text("Refugees leaving " + series.name + " between " + (year - 9) + " and " + year);
+                title.enabled(true);
+                for(i = 9; i >= 0; i--){
+                    var currYear = year - i;
+                    getEscapingYearly(shortcut, currYear, function(results, def)
+                    {
+                        var dataView2 = chartData3.mapAs();
+                        for(i = 0; i < chartData3.getRowsCount(); i++)
+                        {
+                            if(dataView2.get(i, 'x') > results.x)
+                            {
+                                chartData3.insert(results, i);
+                                return;
+                            }
+                        }
+                        chartData3.append(results);
                     });
                 }
 			}
