@@ -119,3 +119,11 @@ html {
 .country-entry:hover{
     background: #e7e7e7;
 }
+
+#chart1, #chart2{
+    width: 33%;
+}
+
+#chart3{
+    width: auto;
+}

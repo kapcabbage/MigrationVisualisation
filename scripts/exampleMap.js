@@ -2,6 +2,7 @@ var map;
 var searchedCountries = new Array();
 
 $(document).ready(function() {
+    getCountries();
     $("#myRange").on("change", function(e) {
         if (typeof ViewModel.chosenFrom() !== 'undefined') {
             get_connects();
@@ -32,15 +33,12 @@ $(document).ready(function() {
             map.removeSeries(name[0].textContent);
             $(container[0]).remove();
         };
-
     });
     mapObj = generate_map(function(mapa) {
         console.log(mapa);
         map = mapa
     });
     ko.applyBindings(ViewModel);
-    getCountries();
-
 });
 
 
@@ -177,8 +175,8 @@ var generate_map = function(callback) {
             .enabled(true)
             .useHtml(true)
             .padding([10, 0, 10, 0])
-            .text('Population Density (people per km&#178)<br/>' +
-                '<span  style="color:#929292; font-size: 12px;">(Data source: Wikipedia, 2015)</span>');
+            .text('Refugees migration<br/>' +
+                '<span  style="color:#929292; font-size: 12px;">(Data source: Wikipedia, UNHCR API, Worldbank API)</span>');
 
         map.geoData('anychart.maps.world');
         map.interactivity().selectionMode('none');
@@ -188,6 +186,37 @@ var generate_map = function(callback) {
         var density_data = dataSet.mapAs({
             'value': 'density'
         });
+		
+		
+		var tooltip = document.getElementById("myPopup");
+		chart = anychart.bar();
+		chart.container("chart1");
+		var dataSet = anychart.data.set();
+		var barSeries = chart.bar(dataSet);
+		chart.draw();
+		
+		map.listen("pointMouseOver", function(e){
+			// display hidden tooltip
+			tooltip.style.display = 'block';
+
+			var point = e.point;
+			var series = point.getSeries();
+			if (series.Sa != null) {
+				for(i = 0; i < dataSet.getRowsCount(); 	)
+				{
+					dataSet.remove(0);
+				}
+				for(i = 0; i < 10; i++)
+				{
+					dataSet.append({x: series.Sa.iso_a3 + i.toString(), value: i});
+				}
+			}
+		});
+
+		// event for mouse leaving
+		map.listen("pointMouseOut", function(){
+			tooltip.style.display = 'hidden';
+		});
 
 
         var series = map.choropleth(density_data);
@@ -224,5 +253,4 @@ var generate_map = function(callback) {
     console.log(map);
     callback(map)
     return map;
-
 }
