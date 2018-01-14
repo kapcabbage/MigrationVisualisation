@@ -1,5 +1,6 @@
 var map;
 var searchedCountries = new Array();
+var addedSeries = new Array();
 
 $(document).ready(function() {
 
@@ -17,7 +18,15 @@ $(document).ready(function() {
         if (typeof ViewModel.chosenFrom() !== 'undefined') {
             ViewModel.chosenYear(ui.value);
             searchedCountries.forEach(function(entry) {
-                map.removeSeries(entry.name);
+                var filtered = $.grep(addedSeries, function(e) {
+                    return e.indexOf(entry.name) !== -1;
+                })
+                filtered.forEach(function(e) {
+                    map.removeSeries(e);
+                })
+                addedSeries = addedSeries.filter(function(el) {
+                    return filtered.indexOf(el) < 0;
+                });
                 get_connects(entry.code);
             });
         } else console.log("no country provided")
@@ -28,9 +37,15 @@ $(document).ready(function() {
             return a.code == ViewModel.chosenFrom();
         });
         if (entry.length > 0) {
-            console.log('hit')
-            console.log(entry[0].name);
-            map.removeSeries(entry[0].name);
+            var filtered = $.grep(addedSeries, function(e) {
+                return e.indexOf(entry.name) !== -1;
+            })
+            filtered.forEach(function(e) {
+                map.removeSeries(e);
+            })
+            addedSeries = addedSeries.filter(function(el) {
+                return filtered.indexOf(el) < 0;
+            });
         };
         get_connects(ViewModel.chosenFrom());
         console.log(map.getSeriesCount());
@@ -44,15 +59,22 @@ $(document).ready(function() {
         var entry = $.grep(searchedCountries, function(a) {
             return a.name == name[0].textContent;
         });
-        console.log(entry[0])
 
         if (entry.length > 0) {
-            console.log(searchedCountries.indexOf(entry[0]));
             var index = searchedCountries.indexOf(entry[0]);
             searchedCountries.splice(index, 1);
-            map.removeSeries(name[0].textContent);
+            var filtered = $.grep(addedSeries, function(e) {
+                return e.indexOf(name[0].textContent) !== -1;
+            })
+            filtered.forEach(function(entry) {
+                map.removeSeries(entry);
+            })
+            addedSeries = addedSeries.filter(function(el) {
+                return filtered.indexOf(el) < 0;
+            });
             $(container[0]).remove();
         };
+        console.log(addedSeries);
         console.log(searchedCountries);
 
     });
@@ -89,8 +111,12 @@ var get_connects = function(chosenFrom) {
                     '</span>' +
                     '</li>');
             }
-            var dataSet = anychart.data.set(borders);
-            createSeries('3 - 5%', dataSet, getRandomColor(), borders[0].from)
+            var color = getRandomColor();
+            borders.forEach(function(e) {
+                var dataSet = anychart.data.set([e]);
+                createSeries(e.value, dataSet, color, e.from + e.value)
+            })
+
         })
     });
 }
@@ -99,7 +125,7 @@ var deleteSeries = function() {
 
 }
 
-var createSeries = function(name, data, color, seriesFrom) {
+var createSeries = function(value, data, color, seriesId) {
     // Creates connector series for destinations and customizes them
     var connectorSeries = map.connector(data)
         .name(name)
@@ -107,10 +133,9 @@ var createSeries = function(name, data, color, seriesFrom) {
         .stroke('1.5 ' + color)
         .curvature(0);
 
-    connectorSeries.id(seriesFrom);
+    connectorSeries.id(seriesId);
+    addedSeries.push(seriesId);
 
-    var seriesCount = map.getSeriesCount();
-    //map.removeSeriesAt(0);
     connectorSeries.hovered()
         .stroke('1.5 #212121')
         .fill('#212121');
@@ -119,19 +144,24 @@ var createSeries = function(name, data, color, seriesFrom) {
         .position('100%')
         .size(20)
         .fill(color)
-        .stroke('2 #E1E1E1');
+        .stroke('2 #212121');
 
     connectorSeries.hovered().markers()
         .position('100%')
         .size(20)
         .fill('#212121')
         .stroke('2 #455a64');
-
-    if (name == 'More then 10%') {
+    if (value > 50000) {
+        connectorSeries.startSize(15).endSize(3);
+    } else if (value > 20000 && value <= 50000) {
+        connectorSeries.startSize(12).endSize(2.7);
+    } else if (value > 10000 && value <= 20000) {
+        connectorSeries.startSize(9).endSize(2.5);
+    } else if (value > 5000 && value <= 10000) {
         connectorSeries.startSize(7).endSize(2);
-    } else if (name == '5 - 10%') {
+    } else if (value > 1000 && value <= 5000) {
         connectorSeries.startSize(5).endSize(1.5);
-    } else if (name == '3 - 5%') {
+    } else if (value > 100 && value <= 1000) {
         connectorSeries.startSize(3).endSize(1);
     } else {
         connectorSeries.startSize(0).endSize(0);
@@ -150,7 +180,7 @@ var createSeries = function(name, data, color, seriesFrom) {
 
     connectorSeries.hovered().labels()
         .enabled(true)
-        .fontColor('#212121');
+        .fontColor(color);
 
     // Sets settings for legend items
     connectorSeries.legendItem()
@@ -243,7 +273,7 @@ var generate_map = function(callback) {
                             '<span style="color: #d9d9d9">Area</span>: ' +
                             parseInt(this.getData('area')).toLocaleString() + ' km&#178 <br/>' +
                             '<span style="color: #d9d9d9">pkbPerCapita</span>: ' +
-                            parseInt(this.getData('pkbPerCapita')).toLocaleString() + '<br/>' + this.vaulue;
+                            parseInt(this.getData('pkbPerCapita')).toLocaleString() + '<br/>';
                     });
                 var scale = anychart.scales.ordinalColor([{
                         less: 1000
@@ -289,7 +319,11 @@ var generate_map = function(callback) {
                     });
                 colorRange.ticks()
                     .enabled(true)
-                    .stroke('3 #ffffff')
+                    .stroke({
+                        thickness: 4,
+                        color: '#ffffff',
+                        opacity: 1
+                    })
                     .position('center')
                     .length(20);
                 colorRange.labels()
@@ -307,6 +341,17 @@ var generate_map = function(callback) {
                         }
                         return name
                     })
+                map.legend()
+                    .enabled(true)
+                    .position('center-bottom')
+                    .padding([20, 0, 0, 0])
+                    .fontSize(10); 
+                    
+                map.legend().title()
+                    .enabled(true)
+                    .fontSize(13)
+                    .padding([0, 0, 5, 0])
+                    .text('Percent of Chinese Overall Exports');
                 // create zoom controls
                 var zoomController = anychart.ui.zoom();
                 zoomController.render(map);

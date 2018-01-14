@@ -8,7 +8,7 @@ var ViewModel = {
     chosenMonth: ko.observable("1"),
     peopleAm: ko.observable("0"),
     chosenCountry: ko.observable("POL"),
-    maxEdge: ko.observable(0),
+    maxEdge: ko.observable(1),
     PKB: ko.observable("0"),
     PKBWhole : ko.observableArray([]),
 
