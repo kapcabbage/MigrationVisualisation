@@ -4,7 +4,14 @@ var searchedCountries = new Array();
 var addedSeries = new Array();
 
 $(document).ready(function() {
-	getCountries();
+    getCountries();
+
+    $('#indicator-selector').change(function() {
+        ViewModel.Indicator($(this).prop('checked'));
+        map.removeSeries("Map")
+        createPkbMap(countries);
+    })
+
     $('#search-close-button').on("click", function(event, ui) {
         $('#search').hide();
     });
@@ -122,7 +129,7 @@ var get_connects = function(chosenFrom) {
 }
 
 var createPkbMap = function(argument) {
-    var pkbdata = ViewModel.getAllPKB(function(pkb, def) {
+    var pkbdata = ViewModel.getPKB(function(pkb, def) {
         argument.forEach(function(entry) {
             var pkbrow = $.grep(pkb, function(a) {
                 return a.country.id == entry.id
@@ -162,44 +169,116 @@ var createPkbMap = function(argument) {
                     parseInt(this.getData('population')).toLocaleString() + '<br/>' +
                     '<span style="color: #d9d9d9">Area</span>: ' +
                     parseInt(this.getData('area')).toLocaleString() + ' km&#178 <br/>' +
-                    '<span style="color: #d9d9d9">$ PKB per capita</span>: ' +
-                    parseInt(this.getData('pkbPerCapita')).toLocaleString();
+                    (ViewModel.Indicator()? '<span style="color: #d9d9d9">$ GBP per capita</span>: ' + parseInt(this.getData('pkbPerCapita')).toLocaleString() : '<span style="color: #d9d9d9">$ GBP growth(annual %)</span>: '+ parseFloat(this.getData('pkbPerCapita')).toLocaleString()+'%')
+                    
             });
 
+        if (ViewModel.Indicator()) {
+            var scale = anychart.scales.ordinalColor([{
+                    less: 1000
+                },
+                {
+                    from: 1000,
+                    to: 2000
+                },
+                {
+                    from: 2000,
+                    to: 4000
+                },
+                {
+                    from: 4000,
+                    to: 8000
+                },
+                {
+                    from: 8000,
+                    to: 15000
+                },
+                {
+                    from: 15000,
+                    to: 25000
+                },
+                {
+                    from: 25000,
+                    to: 60000
+                },
+                {
+                    greater: 60000
+                }
+            ]);
+        } else {
+            var scale = anychart.scales.ordinalColor([{
+                    less: -10
+                },
+                {
+                    from: -10,
+                    to: -5
+                },
+                {
+                    from: -5,
+                    to: -1
+                },
+                {
+                    from: -1,
+                    to: 0
+                },
+                {
+                    from: 0,
+                    to: 1
+                },
+                {
+                    from: 1,
+                    to: 2
+                },
+                {
+                    from: 2,
+                    to: 3
+                },
+                {
+                    from: 3,
+                    to: 5
+                },
+                {
+                    from: 5,
+                    to: 8
+                },
+                {
+                    greater: 8
+                }
+            ]);
+        }
 
-        var scale = anychart.scales.ordinalColor([{
-                less: 1000
-            },
-            {
-                from: 1000,
-                to: 2000
-            },
-            {
-                from: 2000,
-                to: 4000
-            },
-            {
-                from: 4000,
-                to: 8000
-            },
-            {
-                from: 8000,
-                to: 15000
-            },
-            {
-                from: 15000,
-                to: 25000
-            },
-            {
-                from: 25000,
-                to: 60000
-            },
-            {
-                greater: 60000
-            }
-        ]);
+        scale.colors(ViewModel.Indicator()?['#EE1111', '#EE4411', '#EE8C11', '#EED311', '#EEEE11', '#AFEE11', '#73EE11', '#12FF11']:['#630b0e','#bf0f0f','#EE1111', '#EE4411', '#EE8C11', '#EED311', '#EEEE11', '#AFEE11', '#73EE11', '#12FF11']);
+        series.colorScale(scale);
 
-        scale.colors(['#EE1111', '#EE4411', '#EE8C11', '#EED311', '#EEEE11', '#AFEE11', '#73EE11', '#12FF11']);
+        var colorRange = map.colorRange();
+        colorRange.enabled(true)
+            .padding([20, 0, 0, 0])
+            .colorLineSize(5)
+            .marker({
+                size: 7
+            });
+        colorRange.ticks()
+            .enabled(true)
+
+            .position('center')
+            .length(20);
+        colorRange.labels()
+            .fontSize(10)
+            .padding(0, 0, 0, 5)
+            .format(function() {
+                var range = this.colorRange;
+                var name;
+                if (isFinite(range.start + range.end)) {
+                    name = range.start + ' - ' + range.end;
+                } else if (isFinite(range.start)) {
+                    name = 'More then ' + range.start;
+                } else {
+                    name = 'Less then ' + range.end;
+                }
+                return name
+            })
+        colorRange.title()
+            .enabled(true)
         series.colorScale(scale);
 
         var colorRange = map.colorRange();
@@ -234,7 +313,7 @@ var createPkbMap = function(argument) {
             .useHtml(true)
             .fontSize(9)
             .padding([10, 0, 10, 0])
-            .text('$ GDP per capita');
+            .text(ViewModel.Indicator()?'$ GDP per capita':'$ GDP annual growth %');
         map.legend()
             .enabled(true)
             .position('center-bottom')
@@ -247,7 +326,7 @@ var createPkbMap = function(argument) {
             .padding([0, 0, 5, 0])
             .text('Visibility');
         // create zoom controls
-        
+
     });
 }
 

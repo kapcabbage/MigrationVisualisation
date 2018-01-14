@@ -7,32 +7,37 @@
     <link rel="stylesheet" type="text/css" href="../source/font-awesome-4.5.0/css/font-awesome.css">
     <link rel="stylesheet" href="https://cdn.anychart.com/releases/8.0.1/css/anychart-ui.min.css" />
     <link rel="stylesheet" href="https://cdn.anychart.com/releases/8.0.1/fonts/css/anychart-font.min.css" />
+    <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../styles/jquery-ui.min.css" />
     <link rel="stylesheet" href="../styles/style.css" />
     <link rel="stylesheet" href="../styles/sliderv2.css" />
 </head>
 
 <body>
-	<div class="modal" id="myPopup">
-		<div class="innerCenter">
-			<div id="chart1"></div>
-			<div id="chart2"></div>
-			<div id="chart3"></div>
-		</div>
-	</div>
+    <div class="modal" id="myPopup">
+        <div class="innerCenter">
+            <div id="chart1"></div>
+            <div id="chart2"></div>
+            <div id="chart3"></div>
+        </div>
+    </div>
     <div class="pagecontainer">
         <div class="navcontainer">
             <nav class="navbar navbar-default navbar-fixed-side" style="z-index: 100;">
                 <div class="container">
                     <ul class="nav navbar-nav" id="sidebar">
                         <li class="active"><a href="#">Home</a></li>
+                        <li>
+                        </li>
                         <li class="dropdown">
-                            <a class="dropdown-toggle" data-toggle="dropdown" href="#">Page 1
+                            <a class="dropdown-toggle" data-toggle="dropdown" href="#">Select indicator type
         <span class="caret"></span></a>
                         </li>
-                        <li><a href="show">Show Top10</a></li>
+                        <li>
+                            <input type="checkbox" checked  data-toggle="toggle" data-off="GBP growth" data-on="GBP per capita" data-onstyle="default" data-width="100%" id="indicator-selector"/>
+
+                        </li>
                         <li id="search-modal-button"><a href="#search"> Search</a></li>
-                        
                     </ul>
                 </div>
             </nav>
@@ -50,11 +55,9 @@
                     </div>
                 </div>
                 <div class="dataselector" id="search">
-
                     <form id="get-migration">
                         <i class="fa fa-times" style="float: right;" aria-hidden="true" id="search-close-button"></i>
                         <h4>Choose country</h4>
-
                         <div class="form-group">
                             <label class="control-label col-sm-2" for="email">From:</label>
                             <div class="col-sm-10">
@@ -66,14 +69,14 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="control-label col-sm-2"">Max edges</label>
-                            <div class="col-sm-10">
-                                <input data-bind="value: maxEdge" type="number" step="1" value="1" placeholder="Max edges" min="1" max="10" class="    form-control"/>
+                            <label class="control-label col-sm-2" ">Max edges</label>
+                            <div class="col-sm-10 ">
+                                <input data-bind="value: maxEdge " type="number " step="1 " value="1 " placeholder="Max edges " min="1 " max="10 " class=" form-control "/>
                             </div>
                         </div>
-                        <div class="form-group">
-                            <div class="col-sm-offset-2 col-sm-10 send-button">
-                                <button type="submit" class="btn btn-success" id="show-migration">Show</button>
+                        <div class="form-group ">
+                            <div class="col-sm-offset-2 col-sm-10 send-button ">
+                                <button type="submit " class="btn btn-success " id="show-migration ">Show</button>
                             </div>
                         </div>
                     </form>
@@ -82,21 +85,22 @@
         </div>
     </div>
 </body>
-<script type="text/javascript" src="../scripts/jquery-3.2.1.js"></script>
-<script type="text/javascript" src="../scripts/jquery-ui.min.js"></script>
-<script type="text/javascript" src="../scripts/knockout-3.4.2.js"></script>
-<script type="text/javascript" src="../scripts/knockout.mapping-latest.debug.js"></script>
-<script type="text/javascript" src="../source/anyMap/world.js"></script>
-<script type="text/javascript" src="../source/anyMap/anychart-base.min.js"></script>
-<script type="text/javascript" src="../source/anyMap/anychart-exports.min.js"></script>
-<script type="text/javascript" src="../source/anyMap/anychart-ui.min.js"></script>
-<script type="text/javascript" src="../source/anyMap/anychart-map.min.js"></script>
-<script type="text/javascript" src="../source/anyMap/anychart-data-adapter.min.js"></script>
-<script src="http://maps.google.com/maps/api/js?sensor=set_to_true_or_false"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.3.15/proj4.js"></script>
-<script type="text/javascript" src="../scripts/helpers.js"></script>
-<script type="text/javascript" src="../scripts/countryManager.js"></script>
-<script type="text/javascript" src="../scripts/exampleMap.js"></script>
-<script type="text/javascript" src="../scripts/sliderv2.js"></script>
+<script type="text/javascript " src="../scripts/jquery-3.2.1.js "></script>
+<script type="text/javascript " src="../scripts/jquery-ui.min.js "></script>
+<script type="text/javascript " src="../scripts/knockout-3.4.2.js "></script>
+<script type="text/javascript " src="../scripts/knockout.mapping-latest.debug.js "></script>
+<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js "></script>
+<script type="text/javascript " src="../source/anyMap/world.js "></script>
+<script type="text/javascript " src="../source/anyMap/anychart-base.min.js "></script>
+<script type="text/javascript " src="../source/anyMap/anychart-exports.min.js "></script>
+<script type="text/javascript " src="../source/anyMap/anychart-ui.min.js "></script>
+<script type="text/javascript " src="../source/anyMap/anychart-map.min.js "></script>
+<script type="text/javascript " src="../source/anyMap/anychart-data-adapter.min.js "></script>
+<script src="http://maps.google.com/maps/api/js?sensor=set_to_true_or_false "></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.3.15/proj4.js "></script>
+<script type="text/javascript " src="../scripts/helpers.js "></script>
+<script type="text/javascript " src="../scripts/countryManager.js "></script>
+<script type="text/javascript " src="../scripts/exampleMap.js "></script>
+<script type="text/javascript " src="../scripts/sliderv2.js "></script>
 
 </html>
