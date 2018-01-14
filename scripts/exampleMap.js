@@ -36,11 +36,13 @@ $(document).ready(function() {
         var entry = $.grep(searchedCountries, function(a) {
             return a.code == ViewModel.chosenFrom();
         });
+        console.log('entry');
         if (entry.length > 0) {
             var filtered = $.grep(addedSeries, function(e) {
-                return e.indexOf(entry.name) !== -1;
+                return e.indexOf(entry[0].name) !== -1;
             })
             filtered.forEach(function(e) {
+                console.log(e);
                 map.removeSeries(e);
             })
             addedSeries = addedSeries.filter(function(el) {
@@ -114,7 +116,7 @@ var get_connects = function(chosenFrom) {
             var color = getRandomColor();
             borders.forEach(function(e) {
                 var dataSet = anychart.data.set([e]);
-                createSeries(e.value, dataSet, color, e.from + e.value)
+                createSeries(e.value, dataSet, color, e.from + " "+e.value)
             })
 
         })
@@ -128,7 +130,7 @@ var deleteSeries = function() {
 var createSeries = function(value, data, color, seriesId) {
     // Creates connector series for destinations and customizes them
     var connectorSeries = map.connector(data)
-        .name(name)
+        .name(seriesId)
         .fill(color)
         .stroke('1.5 ' + color)
         .curvature(0);
@@ -252,6 +254,7 @@ var generate_map = function(callback) {
                     'value': 'pkbPerCapita'
                 });
                 var series = map.choropleth(density_data);
+                series.name("World")
                 series.id("Map")
                 series.labels(false);
 
@@ -319,11 +322,7 @@ var generate_map = function(callback) {
                     });
                 colorRange.ticks()
                     .enabled(true)
-                    .stroke({
-                        thickness: 4,
-                        color: '#ffffff',
-                        opacity: 1
-                    })
+                    
                     .position('center')
                     .length(20);
                 colorRange.labels()
@@ -335,23 +334,29 @@ var generate_map = function(callback) {
                         if (isFinite(range.start + range.end)) {
                             name = range.start + ' - ' + range.end;
                         } else if (isFinite(range.start)) {
-                            name = 'After ' + range.start;
+                            name = 'Less then ' + range.start;
                         } else {
-                            name = 'Before ' + range.end;
+                            name = 'More then ' + range.end;
                         }
                         return name
                     })
+                colorRange.title()
+                    .enabled(true)
+                    .useHtml(true)
+                    .fontSize(9)
+                    .padding([10, 0, 10, 0])
+                    .text('GDP per capita');
                 map.legend()
                     .enabled(true)
                     .position('center-bottom')
                     .padding([20, 0, 0, 0])
                     .fontSize(10); 
-                    
+
                 map.legend().title()
                     .enabled(true)
                     .fontSize(13)
                     .padding([0, 0, 5, 0])
-                    .text('Percent of Chinese Overall Exports');
+                    .text('Visibility');
                 // create zoom controls
                 var zoomController = anychart.ui.zoom();
                 zoomController.render(map);
