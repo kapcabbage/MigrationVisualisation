@@ -4,6 +4,7 @@ var searchedCountries = new Array();
 var addedSeries = new Array();
 
 $(document).ready(function() {
+	getCountries();
     $('#search-close-button').on("click", function(event, ui) {
         $('#search').hide();
     });
