@@ -16,55 +16,56 @@ var ViewModel = {
     peopleAm: ko.observable("0"),
     chosenCountry: ko.observable("POL"),
     maxEdge: ko.observable(1),
-    PKB: ko.observable("0"),
-    PKBWhole : ko.observableArray([]),
+    PKBGrowth: ko.observableArray([]),
+    PKBPerCapita: ko.observableArray([]),
+    Indicator: ko.observable(true),
 
 
-    getRefugees: function(chosenFrom,callback) {
+    getRefugees: function(chosenFrom, callback) {
         //var def =  getRefugees(callback);
-        return getRefugees(chosenFrom,callback);
+        return getRefugees(chosenFrom, callback);
     },
-    getResidents: function(chosenCountry,callback) {
+    getResidents: function(chosenCountry, callback) {
         //var def =  getRefugees(callback);
-        return getResidents(chosenCountry,callback);
+        return getResidents(chosenCountry, callback);
     },
-    getPKB: function(chosenCountry,callback) {
-        getPKB(chosenCountry, callback);
+    getPKBGrowth: function(callback) {
+        return getPKBgrowth(callback);
     },
 
-    getAllPKB: function(callback){
-        return getAllPKB(callback);
+    getPKBPerCapita: function(callback) {
+        return getPKBPerCapita(callback);
     }
 };
 
 ko.bindingHandlers.slider = {
-  init: function (element, valueAccessor, allBindingsAccessor) {
-    var options = allBindingsAccessor().sliderOptions || {};
-      if (ko.isObservable(options.max)) {
-          options.max.subscribe(function(newValue) {
-              $(element).slider('option', 'max', newValue);
-          });
-          options.max = ko.utils.unwrapObservable(options.max);
-      }
-    $(element).slider(options);
-    ko.utils.registerEventHandler(element, "slidechange", function (event, ui) {
-        var observable = valueAccessor();
-        observable(ui.value);
-    });
-    ko.utils.domNodeDisposal.addDisposeCallback(element, function () {
-        $(element).slider("destroy");
-    });
-    ko.utils.registerEventHandler(element, "slide", function (event, ui) {
-        var observable = valueAccessor();
-        observable(ui.value);
-    });
-  },
-  update: function (element, valueAccessor) {
-    var value = ko.utils.unwrapObservable(valueAccessor());
-    if (isNaN(value)) value = 0;
-    $(element).slider("value", value);
+    init: function(element, valueAccessor, allBindingsAccessor) {
+        var options = allBindingsAccessor().sliderOptions || {};
+        if (ko.isObservable(options.max)) {
+            options.max.subscribe(function(newValue) {
+                $(element).slider('option', 'max', newValue);
+            });
+            options.max = ko.utils.unwrapObservable(options.max);
+        }
+        $(element).slider(options);
+        ko.utils.registerEventHandler(element, "slidechange", function(event, ui) {
+            var observable = valueAccessor();
+            observable(ui.value);
+        });
+        ko.utils.domNodeDisposal.addDisposeCallback(element, function() {
+            $(element).slider("destroy");
+        });
+        ko.utils.registerEventHandler(element, "slide", function(event, ui) {
+            var observable = valueAccessor();
+            observable(ui.value);
+        });
+    },
+    update: function(element, valueAccessor) {
+        var value = ko.utils.unwrapObservable(valueAccessor());
+        if (isNaN(value)) value = 0;
+        $(element).slider("value", value);
 
-  }
+    }
 };
 
 
@@ -80,30 +81,30 @@ function getCountries() {
     );
 }
 
-function get3LetterCode(country){
-	if (namesDict[country])
-	{
-		country = namesDict[country]
-	}
-	var foundShort
+function get3LetterCode(country) {
+    if (namesDict[country]) {
+        country = namesDict[country]
+    }
+    var foundShort
     ko.utils.arrayForEach(ViewModel.countries(), function(countryObj) {
-		var countryName = countryObj.country_of_residence_en().toString();
-		if(countryName == country){
-			foundShort = countryObj.country_of_residence();
-		}
+        var countryName = countryObj.country_of_residence_en().toString();
+        if (countryName == country) {
+            foundShort = countryObj.country_of_residence();
+        }
     });
-	if(foundShort != null && foundShort != undefined){
-		return foundShort;
-	}
+    if (foundShort != null && foundShort != undefined) {
+        return foundShort;
+    }
     ko.utils.arrayForEach(ViewModel.countries(), function(countryObj) {
-		var countryName = countryObj.country_of_residence_en().toString();
-		console.log(countryName);
+        var countryName = countryObj.country_of_residence_en().toString();
+        console.log(countryName);
     });
-	console.log("Country not found " + country + ". List of avaliable countries above.");
+    console.log("Country not found " + country + ". List of avaliable countries above.");
 }
 
-function getAllPKB(callback) {
+function getPKBPerCapita(callback) {
     var query = "?";
+    var indicator;
     var def = $.Deferred();
     if (ViewModel.chosenYear() != "") {
         if (query != "?") {
@@ -111,26 +112,32 @@ function getAllPKB(callback) {
         }
         query += "date=" + ViewModel.chosenYear();
     }
+    if(ViewModel.Indicator()){
+        indicator = "NY.GDP.PCAP.CD/";
+    }
+    else{
+        indicator = "NY.GDP.MKTP.KD.ZG/"
+    }
 
-    var url = "http://api.worldbank.org/v2/countries/all/indicators/NY.GDP.PCAP.CD/" + query + "&per_page=300&format=json";
+    var url = "http://api.worldbank.org/v2/countries/all/indicators/"+ indicator + query + "&per_page=300&format=json";
     console.log(url);
     $.ajax({
         method: 'GET',
         url: url,
         success: function(data) {
-          ViewModel.PKBWhole.removeAll();
+            ViewModel.PKBPerCapita.removeAll();
             for (var i = 0; i < data[1].length; i++) {
-                ViewModel.PKBWhole.push(ko.mapping.fromJS(data[1][i]));
+                ViewModel.PKBPerCapita.push(ko.mapping.fromJS(data[1][i]));
             };
+            console.log(data[1])
         }
-    }).done(function(data){
+    }).done(function(data) {
         callback(data[1], def);
     });
     return def.promise();
 }
 
-
-function getPKB(chosenCountry, callback) {
+function getPKBGrowth(callback) {
     var query = "?";
     var def = $.Deferred();
     if (ViewModel.chosenYear() != "") {
@@ -140,23 +147,19 @@ function getPKB(chosenCountry, callback) {
         query += "date=" + ViewModel.chosenYear();
     }
 
-    var url = "http://api.worldbank.org/v2/countries/" + chosenCountry + "/indicators/NY.GDP.PCAP.CD/" + query;
+    var url = "http://api.worldbank.org/v2/countries/all/indicators/NY.GDP.MKTP.KD.ZG/" + query + "&per_page=300&format=json";
     console.log(url);
     $.ajax({
         method: 'GET',
         url: url,
-        //dataType: "json",
         success: function(data) {
-          
-            if (data.length > 0) {
-                ViewModel.PKB(data[0].value);
-            } else {
-                ViewModel.PKB("0");
-            }
-        },
-        done: function(data){
-            callback(data);
+            ViewModel.PKBGrowth.removeAll();
+            for (var i = 0; i < data[1].length; i++) {
+                ViewModel.PKBGrowth.push(ko.mapping.fromJS(data[1][i]));
+            };
         }
+    }).done(function(data) {
+        callback(data[1], def);
     });
 
     return def.promise();
@@ -192,9 +195,9 @@ function getRefugees(chosenFrom, callback) {
                 }
                 // Sort by price high to low
                 outputData.sort(sort_by('value', true, parseInt));
-            
+
                 ViewModel.peopleAm(data[0].value);
-                outputData = outputData.slice(0,ViewModel.maxEdge());
+                outputData = outputData.slice(0, ViewModel.maxEdge());
             } else {
                 ViewModel.peopleAm("0");
             }
@@ -205,16 +208,15 @@ function getRefugees(chosenFrom, callback) {
     return def.promise();
 }
 
-function compareAmounts(a,b) {
-  if (a.refugees > b.refugees)
-    return -1;
-  if (a.refugees < b.refugees)
-    return 1;
-  return 0;
+function compareAmounts(a, b) {
+    if (a.refugees > b.refugees)
+        return -1;
+    if (a.refugees < b.refugees)
+        return 1;
+    return 0;
 }
 
-function getResidents(chosenCountry, callback)
-{
+function getResidents(chosenCountry, callback) {
     var query = "?";
     var def = $.Deferred();
     if (chosenCountry != "") {
@@ -227,14 +229,13 @@ function getResidents(chosenCountry, callback)
         query += "year=" + ViewModel.chosenYear();
     }
     var outputData = [];
-	$.getJSON("http://popdata.unhcr.org/api/stats/persons_of_concern.json" + query,
+    $.getJSON("http://popdata.unhcr.org/api/stats/persons_of_concern.json" + query,
         function(data) {
-			data.sort(compareAmounts);
-			var limit = Math.min(data.length, 10);
-			for(i = 0; i < limit; i++)
-			{
-				outputData.push({x: data[i].country_of_origin, value: data[i].refugees})
-			}
+            data.sort(compareAmounts);
+            var limit = Math.min(data.length, 10);
+            for (i = 0; i < limit; i++) {
+                outputData.push({ x: data[i].country_of_origin, value: data[i].refugees })
+            }
             //console.log(outputData);
         }
     ).done(function() {
@@ -244,19 +245,19 @@ function getResidents(chosenCountry, callback)
 }
 
 var get_coord_point = function(place, callback) {
-    
+
     var def = $.Deferred();
     var point = new Array();
-    $.getJSON("https://restcountries.eu/rest/v2/name/" + place.replace('.',''), function(result) {
+    $.getJSON("https://restcountries.eu/rest/v2/name/" + place.replace('.', ''), function(result) {
 
-            var resulty = result[0].latlng[1];
-            var resultx = result[0].latlng[0];
-            var fromx = resultx;
-            var fromy = resulty;
-            point.push(fromx);
-            point.push(fromy);
-            
-        
+        var resulty = result[0].latlng[1];
+        var resultx = result[0].latlng[0];
+        var fromx = resultx;
+        var fromy = resulty;
+        point.push(fromx);
+        point.push(fromy);
+
+
     }).done(function() {
         callback(point, def);
     });
@@ -267,7 +268,7 @@ var get_coord = function(data_border, callback) {
     var i = 1;
     var json_border = [];
     $.each(data_border, function() {
-    	var row = this;
+        var row = this;
         var point = new Array();
         var fromPoint = new Array();
         var toPoint = new Array();
@@ -286,7 +287,7 @@ var get_coord = function(data_border, callback) {
         def.done(function() {
             var s = fromPoint.concat(toPoint);
 
-            json_border.push({ points: s, curvature: -0.27 ,from: row.from, to: row.to, value: row.value,year:row.year});
+            json_border.push({ points: s, curvature: -0.27, from: row.from, to: row.to, value: row.value, year: row.year });
             if (i === data_border.length) {
                 callback(json_border)
             }

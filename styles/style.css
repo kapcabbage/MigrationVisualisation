@@ -151,3 +151,8 @@ html {
 	transform: translate(20%,20%);
 	width: 65%;
 }
+
+/* Cusom flip toggle switch */
+.toggle .btn .btn-default{
+    width: 100%;
+}
