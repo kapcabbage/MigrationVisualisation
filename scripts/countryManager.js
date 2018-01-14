@@ -89,7 +89,6 @@ function getAllPKB(callback) {
             for (var i = 0; i < data[1].length; i++) {
                 ViewModel.PKBWhole.push(ko.mapping.fromJS(data[1][i]));
             };
-          console.log(ViewModel.PKBWhole())  
         }
     }).done(function(data){
         callback(data[1], def);
