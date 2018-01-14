@@ -360,15 +360,23 @@ var generate_map = function(callback) {
         map.interactivity().selectionMode('none');
         map.padding(0);
 			
-		var tooltip = document.getElementById("myPopup");
-		tooltip.onclick = function() {
-			tooltip.style.display = "none";
+		var popup = document.getElementById("myPopup");
+		popup.onclick = function() {
+			popup.style.display = "none";
 		}
 		chart1 = anychart.column();
 		chart1.container("chart1");
 		var chartData1 = anychart.data.set();
 		chart1.column(chartData1);
 		chart1.draw();
+        chart1.tooltip()
+            .useHtml(true)
+            .format(function() {
+                var asdf = this;
+                return '<span style="color: #d9d9d9">From</span>: ' + getNameFromCode(this.x) + '<br/>' +
+                '<span style="color: #d9d9d9">Population</span>: ' + this.value
+            });
+            
 		chart2 = anychart.bar();
 		chart2.container("chart2");
 		var chartData2 = anychart.data.set();
@@ -381,14 +389,12 @@ var generate_map = function(callback) {
 		chart3.draw();
 		
 		map.listen("click", function(e){
-			// display hidden tooltip
 
 			var index = e.pointIndex;
 			if (index != null && typeof index !== 'undefined') {
-				tooltip.style.display = 'block';
+				popup.style.display = 'block';
 				var series = data[index];
 				var shortcut = get3LetterCode(series.name)
-				
 				
 				for(i = 0; i < chartData1.getRowsCount(); 	)
 				{
@@ -396,6 +402,14 @@ var generate_map = function(callback) {
 				}
 				getResidents(shortcut, function(results, def) 
 				{
+                    var title = chart1.title();
+                    var intermission = "";
+                    if(results.length < 10)
+                    {
+                        intermission += "(" + results.length + ")";
+                    }
+                    title.text("Refugees residing in " + ViewModel.chosenYear() + ", top 10" + intermission +" nationalities");
+                    title.enabled(true);
 					for(i = 0; i < results.length; i++)
 					{
 						chartData1.append(results[i]);

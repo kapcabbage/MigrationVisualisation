@@ -102,6 +102,17 @@ function get3LetterCode(country){
 	console.log("Country not found " + country + ". List of avaliable countries above.");
 }
 
+function getNameFromCode(code){
+	var foundName
+    ko.utils.arrayForEach(ViewModel.countries(), function(countryObj) {
+		var countryShort = countryObj.country_of_residence().toString();
+		if(countryShort == code){
+			foundName = countryObj.country_of_residence_en();
+		}
+    });
+	return foundName;
+}
+
 function getAllPKB(callback) {
     var query = "?";
     var def = $.Deferred();
