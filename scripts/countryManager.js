@@ -8,15 +8,21 @@ var ViewModel = {
     chosenMonth: ko.observable("1"),
     peopleAm: ko.observable("0"),
     chosenCountry: ko.observable("POL"),
+    maxEdge: ko.observable(1),
     PKB: ko.observable("0"),
+    PKBWhole : ko.observableArray([]),
 
 
     getRefugees: function(chosenFrom,callback) {
         //var def =  getRefugees(callback);
         return getRefugees(chosenFrom,callback);
     },
-    getPKB: function() {
-        getPKB();
+    getPKB: function(chosenCountry,callback) {
+        getPKB(chosenCountry, callback);
+    },
+
+    getAllPKB: function(callback){
+        return getAllPKB(callback);
     }
 };
 
@@ -63,8 +69,9 @@ function getCountries() {
     );
 }
 
-function getPKB() {
+function getAllPKB(callback) {
     var query = "?";
+    var def = $.Deferred();
     if (ViewModel.chosenYear() != "") {
         if (query != "?") {
             query += "&";
@@ -72,25 +79,55 @@ function getPKB() {
         query += "date=" + ViewModel.chosenYear();
     }
 
-    var url = "http://api.worldbank.org/v2/countries/" + ViewModel.chosenCountry() + "/indicators/NY.GDP.PCAP.CD/" + query;
-
+    var url = "http://api.worldbank.org/v2/countries/all/indicators/NY.GDP.PCAP.CD/" + query + "&per_page=300&format=json";
+    console.log(url);
     $.ajax({
-        /*headers: {
-        	'Accept': 'application/json',
-        	'Content-Type': 'application/json'
-        },*/
+        method: 'GET',
+        url: url,
+        success: function(data) {
+          ViewModel.PKBWhole.removeAll();
+            for (var i = 0; i < data[1].length; i++) {
+                ViewModel.PKBWhole.push(ko.mapping.fromJS(data[1][i]));
+            };
+          console.log(ViewModel.PKBWhole())  
+        }
+    }).done(function(data){
+        callback(data[1], def);
+    });
+    return def.promise();
+}
+
+
+function getPKB(chosenCountry, callback) {
+    var query = "?";
+    var def = $.Deferred();
+    if (ViewModel.chosenYear() != "") {
+        if (query != "?") {
+            query += "&";
+        }
+        query += "date=" + ViewModel.chosenYear();
+    }
+
+    var url = "http://api.worldbank.org/v2/countries/" + chosenCountry + "/indicators/NY.GDP.PCAP.CD/" + query;
+    console.log(url);
+    $.ajax({
         method: 'GET',
         url: url,
         //dataType: "json",
         success: function(data) {
-            console.log(data);
+          
             if (data.length > 0) {
                 ViewModel.PKB(data[0].value);
             } else {
                 ViewModel.PKB("0");
             }
+        },
+        done: function(data){
+            callback(data);
         }
     });
+
+    return def.promise();
 }
 
 function getRefugees(chosenFrom,callback) {
@@ -108,8 +145,6 @@ function getRefugees(chosenFrom,callback) {
         query += "year=" + ViewModel.chosenYear();
     }
     var outputData = [];
-    console.log(query)
-    console.log(ViewModel.chosenFrom());
     $.getJSON("http://popdata.unhcr.org/api/stats/asylum_seekers_monthly.json" + query,
         function(data) {
             console.log(data);
@@ -125,9 +160,9 @@ function getRefugees(chosenFrom,callback) {
                 }
                 // Sort by price high to low
                 outputData.sort(sort_by('value', true, parseInt));
-                console.log(outputData);
+            
                 ViewModel.peopleAm(data[0].value);
-                outputData = outputData.slice(0,4);
+                outputData = outputData.slice(0,ViewModel.maxEdge());
             } else {
                 ViewModel.peopleAm("0");
             }
@@ -160,16 +195,13 @@ var get_coord_point = function(place, callback) {
 
 var get_coord = function(data_border, callback) {
     var i = 1;
-    console.log("databorder")
-    console.log(data_border)
     var json_border = [];
     $.each(data_border, function() {
     	var row = this;
         var point = new Array();
         var fromPoint = new Array();
         var toPoint = new Array();
-        console.log(this.from)
-        console.log(this.to)
+
         var from = get_coord_point(this.from, function(point, def) {
             fromPoint = point;
             def.resolve()
@@ -185,13 +217,10 @@ var get_coord = function(data_border, callback) {
             var s = fromPoint.concat(toPoint);
 
             json_border.push({ points: s, curvature: -0.27 ,from: row.from, to: row.to, value: row.value,year:row.year});
-            console.log(json_border)
             if (i === data_border.length) {
-            	console.log(json_border);
                 callback(json_border)
             }
-            console.log(i)
-            console.log(data_border.length)
+    
             i++;
 
         });

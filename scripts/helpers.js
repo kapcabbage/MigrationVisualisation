@@ -11,17 +11,17 @@ function groupBy(list, keyGetter) {
     return map;
 }
 
-var sort_by = function(field, reverse, primer){
+var sort_by = function(field, reverse, primer) {
 
-   var key = primer ? 
-       function(x) {return primer(x[field])} : 
-       function(x) {return x[field]};
+    var key = primer ?
+        function(x) { return primer(x[field]) } :
+        function(x) { return x[field] };
 
-   reverse = !reverse ? 1 : -1;
+    reverse = !reverse ? 1 : -1;
 
-   return function (a, b) {
-       return a = key(a), b = key(b), reverse * ((a > b) - (b > a));
-     } 
+    return function(a, b) {
+        return a = key(a), b = key(b), reverse * ((a > b) - (b > a));
+    }
 }
 
 // Helper function to bind data field to the local var.
@@ -37,5 +37,19 @@ function filter_function(val1, val2) {
 }
 
 function exist(element, given) {
-  return (element == given);
+    return (element == given);
+}
+
+function getRandomColor() {
+    var letters = '0123456789ABCDEF';
+    var color = '#';
+    for (var i = 0; i < 6; i++) {
+
+        color += letters[Math.floor(Math.random() * 16)];
+        while (color == '#67b6f4') {
+            color += letters[Math.floor(Math.random() * 16)];
+
+        }
+    }
+    return color;
 }
