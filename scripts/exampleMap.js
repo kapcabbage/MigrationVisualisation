@@ -63,7 +63,7 @@ $(document).ready(function() {
     $('#get-migration2').submit(function(e) {
         e.preventDefault();
         var entry = $.grep(searchedCountries, function(a) {
-            return a.code == ViewModel.chosenFrom();
+            return true;
         });
         console.log('entry');
         if (entry.length > 0) {
@@ -160,7 +160,7 @@ var get_connects2 = function() {
             console.log(outputData)
             for(i = 0; i < outputData.length; i++){
                 var entry = $.grep(searchedCountries, function(a) {
-                    return a.code == borders[i].from;
+                    return a.name == borders[i].from;
                 });
 
                 if (entry.length == 0) {
