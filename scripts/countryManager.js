@@ -27,6 +27,10 @@ var ViewModel = {
         //var def =  getRefugees(callback);
         return getRefugees(chosenFrom, callback);
     },
+    getRefugees2: function(callback) {
+        //var def =  getRefugees(callback);
+        return getRefugees2(callback);
+    },
     getResidents: function(chosenCountry, callback) {
         //var def =  getRefugees(callback);
         return getResidents(chosenCountry, callback);
@@ -189,6 +193,49 @@ function getRefugees(chosenFrom, callback) {
     return def.promise();
 }
 
+function getRefugees2(callback) {
+    var query = "?";
+    var def = $.Deferred();
+
+    if (ViewModel.chosenYear() != "") {
+        if (query != "?") {
+            query += "&";
+        }
+        query += "year=" + ViewModel.chosenYear();
+    }
+    var outputData = [];
+    $.getJSON("http://popdata.unhcr.org/api/stats/asylum_seekers_monthly.json" + query,
+        function(data) {
+            console.log(data);
+            if (data.length > 0) {
+                var grouped = groupBy(data, function(value){
+                    return value.country_of_origin_en + '#' + value.country_of_asylum_en;
+                });
+                for (var key of grouped.keys()) {
+                    var value = grouped.get(key);
+                    var entry = { from: value[0].country_of_origin_en.split('(')[0], to: value[0].country_of_asylum_en.split('(')[0], year: value[0].year, value: 0 };
+                    value.forEach((item) => {
+                        entry.value += item.value;
+                    })
+                    outputData.push(entry);
+                }
+                // Sort by price high to low
+                outputData.sort(sort_by('value', true, parseInt));
+
+                ViewModel.peopleAm(data[0].value);
+                outputData = outputData.slice(0, ViewModel.maxEdge());
+            } 
+            else 
+            {
+                ViewModel.peopleAm("0");
+            }
+        }
+    ).done(function() {
+        callback(outputData, def);
+    });
+    return def.promise();
+}
+
 function compareAmounts(a,b) {
     if ((a.refugees == 0 || a.refugees == NaN) && (b.refugees == 0 || b.refugees == NaN))
         return 0;
@@ -307,6 +354,9 @@ var get_coord_point = function(place, callback) {
 
     var def = $.Deferred();
     var point = new Array();
+    if (place == "Serbia and Kosovo: S/RES/1244 ") 
+        place = "Serbia";
+    
     $.getJSON("https://restcountries.eu/rest/v2/name/" + place.replace('.', ''), function(result) {
 
         var resulty = result[0].latlng[1];

@@ -59,6 +59,26 @@ $(document).ready(function() {
         };
         get_connects(ViewModel.chosenFrom());
     });
+    
+    $('#get-migration2').submit(function(e) {
+        e.preventDefault();
+        var entry = $.grep(searchedCountries, function(a) {
+            return a.code == ViewModel.chosenFrom();
+        });
+        console.log('entry');
+        if (entry.length > 0) {
+            var filtered = $.grep(addedSeries, function(e) {
+                return e.indexOf(entry[0].name) !== -1;
+            })
+            filtered.forEach(function(e) {
+                map.removeSeries(e);
+            })
+            addedSeries = addedSeries.filter(function(el) {
+                return filtered.indexOf(el) < 0;
+            });
+        };
+        get_connects2();
+    });
 
     $('#sidebar').on('click', '.country-entry-button', function() {
         console.log(searchedCountries);
@@ -111,6 +131,39 @@ var get_connects = function(chosenFrom) {
 
             if (entry.length == 0) {
                 searchedCountries.push({ name: borders[0].from, code: ViewModel.chosenFrom() });
+                console.log(searchedCountries);
+                var sidebar = $('#sidebar').append('<li>' +
+                    '<span class="country-entry">' +
+                    '<p class="country-entry-name">' + borders[0].from + '</p><i class="fa fa-times country-entry-button" aria-hidden="true"></i>' +
+                    '</span>' +
+                    '</li>');
+            }
+            var color = getRandomColor();
+            borders.forEach(function(e) {
+                var dataSet = anychart.data.set([e]);
+                createSeries(e.value, dataSet, color, e.from + " " + e.value)
+            })
+
+        })
+    });
+}
+
+var get_connects2 = function() {
+    var outputData = new Array();
+    var data = ViewModel.getRefugees2(function(destinations, def) {
+        outputData = destinations;
+        def.resolve();
+    });
+    var def = $.when(data);
+    def.done(function() {
+        var borders = get_coord(outputData, function(borders) {
+            console.log(outputData)
+            var entry = $.grep(searchedCountries, function(a) {
+                return a.code == "Top";
+            });
+
+            if (entry.length == 0) {
+                searchedCountries.push({ name: borders[0].from, code: "Top" });
                 console.log(searchedCountries);
                 var sidebar = $('#sidebar').append('<li>' +
                     '<span class="country-entry">' +
