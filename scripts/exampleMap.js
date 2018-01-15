@@ -158,24 +158,24 @@ var get_connects2 = function() {
     def.done(function() {
         var borders = get_coord(outputData, function(borders) {
             console.log(outputData)
-            var entry = $.grep(searchedCountries, function(a) {
-                return a.code == "Top";
-            });
+            for(i = 0; i < outputData.length; i++){
+                var entry = $.grep(searchedCountries, function(a) {
+                    return a.code == borders[i].from;
+                });
 
-            if (entry.length == 0) {
-                searchedCountries.push({ name: borders[0].from, code: "Top" });
-                console.log(searchedCountries);
-                var sidebar = $('#sidebar').append('<li>' +
-                    '<span class="country-entry">' +
-                    '<p class="country-entry-name">' + borders[0].from + '</p><i class="fa fa-times country-entry-button" aria-hidden="true"></i>' +
-                    '</span>' +
-                    '</li>');
+                if (entry.length == 0) {
+                    searchedCountries.push({ name: borders[i].from, code: get3LetterCode(borders[i].from) });
+                    console.log(searchedCountries);
+                    var sidebar = $('#sidebar').append('<li>' +
+                        '<span class="country-entry">' +
+                        '<p class="country-entry-name">' + borders[i].from + '</p><i class="fa fa-times country-entry-button" aria-hidden="true"></i>' +
+                        '</span>' +
+                        '</li>');
+                }
+                var color = getRandomColor();
+                var dataSet = anychart.data.set([borders[i]]);
+                createSeries(borders[i].value, dataSet, color, borders[i].from + " " + borders[i].value)
             }
-            var color = getRandomColor();
-            borders.forEach(function(e) {
-                var dataSet = anychart.data.set([e]);
-                createSeries(e.value, dataSet, color, e.from + " " + e.value)
-            })
 
         })
     });
